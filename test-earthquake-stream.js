@@ -2,9 +2,8 @@
 const path = require('path');
 const fs = require('fs');
 
-// 使用agent目錄中的環境變數
-process.env.DOTENV_CONFIG_PATH = path.join(__dirname, 'agent/.env');
-require('dotenv').config({ path: process.env.DOTENV_CONFIG_PATH });
+// 使用項目根目錄的環境變量
+require('dotenv').config();
 
 // 確保日誌目錄存在
 const logDir = path.join(__dirname, 'logs');
@@ -12,8 +11,8 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
-// 確保合約目錄存在
-const contractsDir = path.join(__dirname, 'contract/agent_gen_contracts');
+// 確保合約目錄存在 - 更新合約目錄路徑為根目錄下的agent_gen_contracts
+const contractsDir = path.join(__dirname, 'agent_gen_contracts');
 if (!fs.existsSync(contractsDir)) {
   fs.mkdirSync(contractsDir, { recursive: true });
 }
@@ -60,7 +59,7 @@ async function testEarthquakeContract() {
     
     if (result) {
       log("✅ 測試成功: 合約生成完成");
-      log("合約文件已保存到 contract/agent_gen_contracts 目錄");
+      log("合約文件已保存到 agent_gen_contracts 目錄");
       log("==================================================");
     } else {
       log("❌ 測試失敗: 合約生成過程中出現錯誤");

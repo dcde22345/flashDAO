@@ -1,63 +1,20 @@
-# Node.js 相關
+# 基礎Node.js相關
 node_modules/
+*/node_modules/
 package-lock.json
+*/package-lock.json
 
-# Agent
-agent/node_modules
-agent/package-lock.json
-agent/logs
-agent/.env
-agent/.env-contract
-
-# Contract
-contract/node_modules
-contract/package-lock.json
-contract/cache
-contract/agent_gen_contracts
-contract/artifacts
-
-# 環境變數和機密檔案
+# 配置文件
+# 環境變數文件 - 只在根目錄
 .env
 .env.*
 !.env.example
 
-
 # 合約生成檔案
-contract/agent_gen_contracts/*
-logs/
+contract/agent_gen_contracts/
 logs/**/*.sol
-logs/**/*.log
 
 # IDE 和編輯器
 .idea/
 .vscode/
-*.sublime-project
-*.sublime-workspace
 .DS_Store
-
-# 建置輸出
-dist/
-build/
-out/
-.next/
-.vercel/
-
-# 測試相關
-.nyc_output/
-.coverage/
-coverage/
-
-# 臨時檔案
-*.swp
-*.swo
-.DS_Store
-.directory
-*~
-*.log
-temp/
-tmp/
-
-# 錢包相關
-**/metamask_phares.txt
-**/pharse.txt
-**/wallet.json

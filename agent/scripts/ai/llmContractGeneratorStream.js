@@ -1,7 +1,7 @@
 // LLM-powered Smart Contract Generator Agent with Streaming Output
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../../../.env') });
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
@@ -160,8 +160,6 @@ Technical requirements:
 - Use Solidity version 0.8.20
 - Follow best practices for security and gas optimization
 - Include ReentrancyGuard from OpenZeppelin
-- The contract MUST be compatible with our FlashDAOFactory
-- The constructor MUST accept an ERC20 token address parameter: constructor(address _donationToken) Ownable(msg.sender)
 - IMPORTANT: Use correct import paths for OpenZeppelin v5:
   - import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
   - import "@openzeppelin/contracts/access/Ownable.sol";
@@ -185,7 +183,7 @@ function parseGeneratedContract(contractCode, eventData) {
   let cleanCode = contractCode.replace(/```solidity|```\s*$/g, '').trim();
   
   // Extract contract name
-  const contractNameMatch = cleanCode.match(/contract\s+([a-zA-Z0-9_]+)/);
+  const contractNameMatch = cleanCode.match(/contract\s+(\w+)/);
   let contractName;
   
   if (contractNameMatch && contractNameMatch[1]) {
@@ -214,30 +212,22 @@ function parseGeneratedContract(contractCode, eventData) {
  * @returns {string} - Path to the saved file
  */
 async function saveContractToFile(contractDetails) {
-  // 保存到agent_gen_contracts目錄
-  let fileName = contractDetails.fileName;
+  // 生成時間戳記
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const eventType = contractDetails.eventData.type.toLowerCase();
+  
+  // 創建包含事件名稱和時間戳記的檔案名稱
+  let fileName = `${eventType}_${timestamp}.sol`;
   let filePath = path.join(CONTRACTS_DIR, fileName);
   
-  // Check if file already exists, if so, add timestamp to avoid overwriting
-  if (fs.existsSync(filePath)) {
-    const timestamp = Date.now();
-    const fileNameParts = fileName.split('.');
-    fileName = `${fileNameParts[0]}_${timestamp}.${fileNameParts[1]}`;
-    filePath = path.join(CONTRACTS_DIR, fileName);
-    
-    log(`Contract file already exists. Using new filename: ${fileName}`);
-    
-    // Update contract details
-    contractDetails.fileName = fileName;
-  }
+  // 更新contractDetails的fileName
+  contractDetails.fileName = fileName;
   
   fs.writeFileSync(filePath, contractDetails.code);
   log(`Contract saved to ${filePath}`);
   
   // 同時保存到logs/contracts目錄
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const eventType = contractDetails.eventData.type.toLowerCase();
-  const logFileName = `${eventType}_${timestamp}.sol`;
+  const logFileName = fileName;
   const logDir = path.join(__dirname, '../../../logs/contracts');
   
   // 確保logs/contracts目錄存在
@@ -273,7 +263,8 @@ async function compileContract(filePath) {
   log("Compiling contract...");
   
   try {
-    const { stdout, stderr } = await execAsync('cd contract && npx hardhat compile');
+    // 修改編譯命令，使用根目錄的Hardhat配置
+    const { stdout, stderr } = await execAsync('npx hardhat compile');
     
     if (stderr) {
       log(`Compilation warnings: ${stderr}`);
@@ -288,52 +279,134 @@ async function compileContract(filePath) {
 }
 
 /**
+ * Generate a factory contract for the disaster DAO
+ * @param {Object} contractDetails - Details of the main contract
+ * @returns {Object} - Factory contract details
+ */
+async function generateFactoryContract(contractDetails) {
+  log(`Generating factory contract for ${contractDetails.name}`);
+  
+  // 使用主合約相同的命名邏輯，只在檔案名增加Factory字樣
+  const fileNameParts = contractDetails.fileName.split('.');
+  const factoryFileName = `${fileNameParts[0]}_factory.${fileNameParts[1]}`;
+  const factoryFilePath = path.join(CONTRACTS_DIR, factoryFileName);
+  
+  const factoryCode = `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "./${contractDetails.fileName}";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+/**
+ * @title ${contractDetails.name}Factory
+ * @dev Factory for creating and managing ${contractDetails.name} instances
+ */
+contract ${contractDetails.name}Factory is Ownable {
+    // List of deployed DAOs
+    address[] public deployedDAOs;
+    
+    // Event emitted when a new DAO is created
+    event DAOCreated(
+        address indexed daoAddress, 
+        string eventName, 
+        string eventType,
+        uint256 severity,
+        uint256 fundingGoal
+    );
+    
+    constructor() Ownable(msg.sender) {}
+    
+    /**
+     * @dev Creates a new ${contractDetails.name} instance
+     * @param usdcAddress Address of the USDC token to use for donations
+     * @return The address of the newly created DAO
+     */
+    function createDAO(address usdcAddress) external onlyOwner returns (address) {
+        ${contractDetails.name} newDAO = new ${contractDetails.name}(usdcAddress);
+        
+        // Transfer ownership to the factory owner
+        newDAO.transferOwnership(owner());
+        
+        deployedDAOs.push(address(newDAO));
+        
+        emit DAOCreated(
+            address(newDAO),
+            "${contractDetails.eventData.name}",
+            "${contractDetails.eventData.type}",
+            ${contractDetails.eventData.severity},
+            calculateFundingGoal(${contractDetails.eventData.severity})
+        );
+        
+        return address(newDAO);
+    }
+    
+    /**
+     * @dev Calculates funding goal based on severity
+     * @param severity Severity of the disaster (1-10)
+     * @return Funding goal in USDC (with 6 decimal places)
+     */
+    function calculateFundingGoal(uint256 severity) public pure returns (uint256) {
+        require(severity > 0 && severity <= 10, "Severity must be between 1 and 10");
+        // Base amount + severity multiplier (e.g., 10,000 USDC for severity 10)
+        return 1000 * 10**6 + (severity * 1000 * 10**6);
+    }
+    
+    /**
+     * @dev Returns the number of deployed DAOs
+     * @return The number of deployed DAOs
+     */
+    function getDeployedDAOsCount() external view returns (uint256) {
+        return deployedDAOs.length;
+    }
+}`;
+  
+  fs.writeFileSync(factoryFilePath, factoryCode);
+  log(`Factory contract saved to ${factoryFilePath}`);
+  
+  return {
+    code: factoryCode,
+    name: `${contractDetails.name}Factory`,
+    fileName: factoryFileName,
+    filePath: factoryFilePath
+  };
+}
+
+/**
  * Generate deployment script for the contracts
  * @param {Object} contractDetails - Details of the main contract
+ * @param {Object} factoryDetails - Details of the factory contract
  * @returns {string} - Path to the saved script
  */
-async function generateDeploymentScript(contractDetails) {
-  const scriptName = `deploy_${contractDetails.name.toLowerCase()}.js`;
+async function generateDeploymentScript(contractDetails, factoryDetails) {
+  // 使用與主合約相同的命名邏輯，但改副檔名為js
+  const fileNameParts = contractDetails.fileName.split('.');
+  const scriptName = `${fileNameParts[0]}_deploy.js`;
   const scriptPath = path.join(CONTRACTS_DIR, scriptName);
   
-  // Ensure the directory exists
-  if (!fs.existsSync(CONTRACTS_DIR)) {
-    fs.mkdirSync(CONTRACTS_DIR, { recursive: true });
-  }
-  
-  const scriptCode = `// Deployment script for ${contractDetails.name} using FlashDAOFactory
-// 運行命令: npx hardhat run scripts/${scriptName} --network sepolia
+  const scriptCode = `// Deployment script for ${contractDetails.name} and ${factoryDetails.name}
+// 運行命令: npx hardhat run agent_gen_contracts/${scriptName} --network sepolia
 
 async function main() {
-  console.log("為 ${contractDetails.eventData.name} 部署合約...");
+  console.log("Deploying contracts for ${contractDetails.eventData.name}...");
   
   // Get deployer account
   const [deployer] = await ethers.getSigners();
-  console.log("使用帳戶部署:", deployer.address);
+  console.log("Deploying with account:", deployer.address);
   
   // Deploy MockUSDC for testing
   const MockUSDC = await ethers.getContractFactory("MockUSDC");
   const mockUSDC = await MockUSDC.deploy("USD Coin", "USDC", 6);
   await mockUSDC.deployed();
-  console.log("MockUSDC 已部署到:", mockUSDC.address);
+  console.log("MockUSDC deployed to:", mockUSDC.address);
   
-  // 獲取現有的FlashDAOFactory
-  // 在實際使用時，替換為您的工廠合約地址
-  const factoryAddress = "YOUR_FACTORY_ADDRESS"; // 替換為FlashDAOFactory合約地址
-  const factory = await ethers.getContractAt("FlashDAOFactory", factoryAddress);
-  console.log("使用現有的 FlashDAOFactory:", factoryAddress);
+  // Deploy factory
+  const Factory = await ethers.getContractFactory("${factoryDetails.name}");
+  const factory = await Factory.deploy();
+  await factory.deployed();
+  console.log("${factoryDetails.name} deployed to:", factory.address);
   
-  // 通過工廠部署DAO合約
-  console.log("正在通過工廠部署 ${contractDetails.name}...");
-  const tx = await factory.createDAO(
-    mockUSDC.address,
-    "${contractDetails.eventData.name}",
-    "${contractDetails.eventData.description}",
-    ${contractDetails.eventData.severity * 1000 * 10**6}, // funding goal based on severity
-    604800, // 7 days funding duration
-    259200  // 3 days voting duration
-  );
-  
+  // Create DAO instance through factory
+  const tx = await factory.createDAO(mockUSDC.address);
   const receipt = await tx.wait();
   
   // Find the DAOCreated event
@@ -343,10 +416,15 @@ async function main() {
   
   if (daoCreatedEvent) {
     const daoAddress = daoCreatedEvent.args.daoAddress;
-    console.log("${contractDetails.name} 已部署到:", daoAddress);
-    console.log("部署完成!");
+    console.log("${contractDetails.name} deployed to:", daoAddress);
+    
+    // Connect to the created DAO
+    const DAO = await ethers.getContractFactory("${contractDetails.name}");
+    const dao = DAO.attach(daoAddress);
+    
+    console.log("Deployment completed successfully!");
   } else {
-    console.log("DAO 創建失敗");
+    console.log("Failed to create DAO");
   }
 }
 
@@ -358,7 +436,7 @@ main()
   });`;
   
   fs.writeFileSync(scriptPath, scriptCode);
-  log(`部署腳本已保存到 ${scriptPath}`);
+  log(`Deployment script saved to ${scriptPath}`);
   
   return scriptPath;
 }
@@ -379,7 +457,10 @@ async function handleEvent(eventData) {
     // Step 2: Save the contract to a file
     const filePath = await saveContractToFile(contractDetails);
     
-    // Step 3: Compile the contract
+    // Step 3: Generate factory contract
+    const factoryDetails = await generateFactoryContract(contractDetails);
+    
+    // Step 4: Compile the contracts
     const compilationSuccessful = await compileContract(filePath);
     
     if (!compilationSuccessful) {
@@ -387,13 +468,11 @@ async function handleEvent(eventData) {
       return false;
     }
     
-    // Step 4: Generate deployment script using existing FlashDAOFactory
-    const scriptPath = await generateDeploymentScript(contractDetails);
+    // Step 5: Generate deployment script
+    const scriptPath = await generateDeploymentScript(contractDetails, factoryDetails);
     
     log(`事件處理完成，準備部署。`);
-    log(`合約已保存到 ${filePath}`);
-    log(`部署腳本已生成: ${scriptPath}`);
-    log(`部署命令: cd contract && npx hardhat run ${path.relative(path.join(__dirname, '../../../contract'), scriptPath)} --network sepolia`);
+    log(`部署命令: npx hardhat run ${path.relative(process.cwd(), scriptPath)} --network sepolia`);
     
     return true;
   } catch (error) {
@@ -461,8 +540,8 @@ async function demonstrateAgent(eventType) {
     const result = await handleEvent(eventData);
     
     if (result) {
-      log("🎉 成功生成智能合約！");
-      log(`合約已保存到 contract/agent_gen_contracts 目錄`);
+      log("🎉 成功生成智能合約和工廠合約！");
+      log("你可以在agent_gen_contracts目錄中找到生成的合約。");
       log("部署腳本已生成，請按照上述指示運行它。");
       return true;
     } else {

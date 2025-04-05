@@ -1,17 +1,20 @@
-/contract/node_modules
-/contract.env
+# 基礎Node.js相關
+node_modules/
+*/node_modules/
+package-lock.json
+*/package-lock.json
 
-# Hardhat files
-/contract/cache
-/contract/artifacts
+# 配置文件
+# 環境變數文件 - 只在根目錄
+.env
+.env.*
+!.env.example
 
-# TypeChain files
-/contract/typechain
-/contract/typechain-types
+# 合約生成檔案
+contract/agent_gen_contracts/
+logs/**/*.sol
 
-# solidity-coverage files
-/contract/coverage
-/contract/coverage.json
-
-# Hardhat Ignition default folder for deployments against a local node
-/contract/ignition/deployments/chain-31337
+# IDE 和編輯器
+.idea/
+.vscode/
+.DS_Store

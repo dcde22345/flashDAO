@@ -5,13 +5,7 @@ import { ethers } from "ethers";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+
 import {
   Dialog,
   DialogContent,
@@ -23,8 +17,6 @@ import {
 interface Dao {
   id: number;
   title: string;
-  summary: string;
-  details: string;
   image: string;
   goal: number;
   current: number;
@@ -48,19 +40,15 @@ export default function Home() {
   const [daos, setDaos] = useState<Dao[]>([]);
 
   useEffect(() => {
-    // 根據台灣 0403 花蓮大地震重構的 DAO 資訊
+    // DAO info based on the April 3 Hualien Earthquake in Taiwan
     setDaos([
       {
         id: 1,
-        title: "台灣 0403 花蓮大地震賑災 DAO",
-        summary:
-          "援助地震災區居民重建生活，提供臨時居所、食物、醫療資源與災後心理重建。",
-        details:
-          "2024 年 4 月 3 日清晨，台灣花蓮發生芮氏規模 7.2 的強震，為 25 年來最強地震，造成超過 16 人死亡、上百人受傷，並有大量建物毀損、居民流離失所。本 DAO 目標為鏈上募資支援災區，包括：1) 緊急物資供應、2) 臨時安置與帳篷、3) 在地合作 NGO 的物資物流支援、4) 災後兒童與老人的心理創傷輔導。",
+        title: "Taiwan Earthquake Relief",
         image: "/example.png",
         goal: 2000,
         current: 625,
-        location: "台灣・花蓮縣與東部地區",
+        location: "Hualien County and Eastern Taiwan",
         date: "2024-04-03",
       },
     ]);
@@ -84,105 +72,108 @@ export default function Home() {
               variant="outline"
               className="border-red-500 text-red-500 hover:bg-red-50"
             >
-              事件触发器
+              Event Trigger
             </Button>
           </Link>
         </div>
         {walletAddress ? (
           <div className="text-sm">
-            已連接錢包: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            Wallet Connected: {walletAddress.slice(0, 6)}...
+            {walletAddress.slice(-4)}
           </div>
         ) : (
-          <Button onClick={connectWallet}>連接錢包</Button>
+          <Button onClick={connectWallet}>Connect Wallet</Button>
         )}
       </div>
 
-      <div className="mx-auto flex flex-wrap justify-center gap-6 max-w-[96rem]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto px-4">
         {daos.map((dao) => (
-          <Card
+          <div
+            style={{ width: "100%", maxWidth: "300px" }}
+            className="mx-auto"
             key={dao.id}
-            className="!bg-white !text-card-foreground !overflow-hidden !rounded-lg !w-[18rem] rounded-[20px]"
           >
-            <div className="relative aspect-[16/9] bg-gray-100">
-              <Image
-                src={dao.image}
-                alt={dao.title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover"
-                priority
-              />
-            </div>
-            <div className="p-[10px]">
-              <CardHeader className="p-0">
-                <CardTitle className="text-base font-semibold">
-                  {dao.title}
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-600">
-                  {dao.summary}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="text-sm text-gray-500 mb-1">
-                  地點：{dao.location}
+            <div className="bg-white overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+              <div className="relative w-full aspect-[4/3]">
+                <Image
+                  src={dao.image}
+                  alt={dao.title}
+                  width={300}
+                  height={300}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
+                />
+              </div>
+
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold mb-2">{dao.title}</h3>
+                  <p className="text-sm text-gray-600">{dao.summary}</p>
                 </div>
-                <div className="text-sm text-gray-500 mb-2">
-                  目標：{dao.goal} USDC ・ 已募集：{dao.current} USDC
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${(dao.current / dao.goal) * 100}%` }}
-                  ></div>
-                </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      style={{
-                        backgroundColor: "#3b82f6",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "0.375rem",
-                        width: "100%",
-                        transition: "all 0.2s ease-in-out",
-                        fontWeight: "500",
-                        padding: "0.75rem 1rem",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        cursor: "pointer",
-                        transform: "translateY(0)",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#2563eb";
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                        e.currentTarget.style.boxShadow =
-                          "0 4px 6px rgba(0,0,0,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "#3b82f6";
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow =
-                          "0 2px 4px rgba(0,0,0,0.1)";
-                      }}
-                    >
-                      了解更多
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{dao.title}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-gray-700">{dao.details}</p>
-                      <div className="text-sm text-gray-500">
-                        <p>地點: {dao.location}</p>
-                        <p>日期: {dao.date}</p>
+
+                <div className="space-y-3 flex-1 flex flex-col">
+                  <div className="text-sm text-gray-500">
+                    <span className="font-medium">Location:</span>{" "}
+                    {dao.location}
+                  </div>
+
+                  <div className="space-y-1.5 w-full mt-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="font-medium text-gray-600">
+                        <span>{dao.current}</span>
+                        <span className="text-gray-400 mx-1">/</span>
+                        <span>{dao.goal} USDC</span>
+                      </div>
+                      <div className="text-blue-600 font-medium">
+                        {Math.round((dao.current / dao.goal) * 100)}%
                       </div>
                     </div>
-                  </DialogContent>
-                </Dialog>
-              </CardContent>
+
+                    <div className="w-full h-2 bg-gray-100 rounded-full">
+                      <div
+                        className="h-2 bg-blue-600 rounded-full"
+                        style={{
+                          width: `${Math.min(
+                            (dao.current / dao.goal) * 100,
+                            100
+                          )}%`,
+                          background:
+                            "linear-gradient(90deg, #3b82f6, #2563eb)",
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto pt-4">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          className="w-full bg-blue-600 text-white font-medium rounded-lg py-3 px-4 hover:bg-blue-700 transition-colors shadow-sm"
+                        >
+                          Learn More
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{dao.title}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <p className="text-gray-700">{dao.details}</p>
+                          <div className="text-sm text-gray-500">
+                            <p>Location: {dao.location}</p>
+                            <p>Date: {dao.date}</p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     </main>

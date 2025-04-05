@@ -11,20 +11,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
+    "/volunteer/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/volunteer/page.js"
+    ],
     "/event_trigger/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/event_trigger/page.js"
     ],
-    "/api/agent/trigger/route": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/agent/trigger/route.js"
-    ],
-    "/volunteer/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/volunteer/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

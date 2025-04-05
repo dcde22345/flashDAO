@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -76,7 +77,17 @@ export default function Home() {
   return (
     <main className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">FlashDAO</h1>
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold mr-6">FlashDAO</h1>
+          <Link href="/event_trigger">
+            <Button
+              variant="outline"
+              className="border-red-500 text-red-500 hover:bg-red-50"
+            >
+              事件触发器
+            </Button>
+          </Link>
+        </div>
         {walletAddress ? (
           <div className="text-sm">
             已連接錢包: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}

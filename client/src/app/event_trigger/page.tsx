@@ -1,12 +1,9 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function EventTrigger() {
-  const router = useRouter();
-
   const triggerEarthquakeEvent = async () => {
     const exampleEarthquakeEvent = {
       type: "Earthquake",
@@ -28,30 +25,33 @@ export default function EventTrigger() {
       });
 
       if (response.ok) {
-        alert("地震事件已触发！");
+        alert("Earthquake event triggered successfully!");
       } else {
-        alert("事件触发失败，请查看控制台以获取更多信息");
-        console.error("事件触发失败:", await response.text());
+        alert(
+          "Failed to trigger event. Please check the console for more information."
+        );
+        console.error("Event trigger failed:", await response.text());
       }
     } catch (error) {
-      alert("连接错误，请确保服务器正在运行");
-      console.error("连接错误:", error);
+      alert("Connection error. Please ensure the server is running.");
+      console.error("Connection error:", error);
     }
   };
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">事件触发器</h1>
+      <h1 className="text-3xl font-bold mb-8">Event Trigger</h1>
       <div className="p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">模拟灾害事件</h2>
+        <h2 className="text-xl font-semibold mb-4">Simulate Disaster Event</h2>
         <Button
           onClick={triggerEarthquakeEvent}
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg"
         >
-          发生地震
+          Trigger Earthquake
         </Button>
         <p className="mt-4 text-gray-600">
-          点击此按钮将模拟花莲县发生7.2级地震事件，并将数据发送到后端系统。
+          Clicking this button will simulate a magnitude 7.2 earthquake in
+          Hualien County and send the event data to the backend system.
         </p>
       </div>
     </div>

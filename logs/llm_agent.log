@@ -1,0 +1,159 @@
+[2025-04-05T08:54:15.035Z] ==================================================
+[2025-04-05T08:54:15.052Z] 處理新API事件: Earthquake - Test Event
+[2025-04-05T08:54:15.052Z] ==================================================
+[2025-04-05T08:54:15.052Z] 生成智能合約: Earthquake - Test Event
+[2025-04-05T08:54:15.052Z] 連接Claude API並開始生成...
+[2025-04-05T08:54:15.870Z] API錯誤: 401 Unauthorized
+[2025-04-05T08:54:15.870Z] {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}
+[2025-04-05T08:54:15.871Z] 生成合約時出錯: API錯誤: 401
+[2025-04-05T08:54:15.871Z] 處理事件時發生錯誤: API錯誤: 401
+[2025-04-05T09:10:48.522Z] 開始為 earthquake 事件生成合約...
+[2025-04-05T09:10:48.528Z] 選擇事件: Earthquake - Hualien Earthquake
+[2025-04-05T09:10:48.528Z] 嚴重程度: 8/10
+[2025-04-05T09:10:48.528Z] 位置: Hualien County, Taiwan
+[2025-04-05T09:10:48.528Z] ==================================================
+[2025-04-05T09:10:48.529Z] 處理新事件: Earthquake - Hualien Earthquake
+[2025-04-05T09:10:48.529Z] ==================================================
+[2025-04-05T09:10:48.529Z] 生成智能合約: Earthquake - Hualien Earthquake
+[2025-04-05T09:10:48.530Z] 連接Claude API並開始生成...
+[2025-04-05T09:10:48.530Z] ========== 開始生成智能合約 ==========
+[2025-04-05T09:10:49.038Z] API錯誤: 401 Unauthorized
+[2025-04-05T09:10:49.038Z] {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}
+[2025-04-05T09:10:49.038Z] 生成合約時出錯: API錯誤: 401
+[2025-04-05T09:10:49.038Z] 處理事件時發生錯誤: API錯誤: 401
+[2025-04-05T09:10:49.038Z] ❌ 合約生成過程中出現錯誤。
+[2025-04-05T09:11:58.377Z] 開始為 earthquake 事件生成合約...
+[2025-04-05T09:11:58.386Z] 選擇事件: Earthquake - Hualien Earthquake
+[2025-04-05T09:11:58.386Z] 嚴重程度: 8/10
+[2025-04-05T09:11:58.386Z] 位置: Hualien County, Taiwan
+[2025-04-05T09:11:58.386Z] ==================================================
+[2025-04-05T09:11:58.387Z] 處理新事件: Earthquake - Hualien Earthquake
+[2025-04-05T09:11:58.387Z] ==================================================
+[2025-04-05T09:11:58.387Z] 生成智能合約: Earthquake - Hualien Earthquake
+[2025-04-05T09:11:58.387Z] 連接Claude API並開始生成...
+[2025-04-05T09:11:58.388Z] ========== 開始生成智能合約 ==========
+[2025-04-05T09:11:58.790Z] API錯誤: 401 Unauthorized
+[2025-04-05T09:11:58.790Z] {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}
+[2025-04-05T09:11:58.790Z] 生成合約時出錯: API錯誤: 401
+[2025-04-05T09:11:58.791Z] 處理事件時發生錯誤: API錯誤: 401
+[2025-04-05T09:11:58.791Z] ❌ 合約生成過程中出現錯誤。
+[2025-04-05T09:13:36.368Z] ==================================================
+[2025-04-05T09:13:36.368Z] 處理新事件: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T09:13:36.369Z] ==================================================
+[2025-04-05T09:13:36.369Z] 生成智能合約: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T09:13:36.369Z] 連接Claude API並開始生成...
+[2025-04-05T09:13:36.369Z] ========== 開始生成智能合約 ==========
+[2025-04-05T09:14:22.496Z] 
+========== 智能合約生成完成 ==========
+[2025-04-05T09:14:22.497Z] 合約代碼長度: 5170 字元
+[2025-04-05T09:14:22.497Z] Extracted contract name from code: TaiwanEastCoastEarthquakeDAO
+[2025-04-05T09:14:22.498Z] Contract saved to /Users/hank.tsai/Desktop/agent_gen_contracts/TaiwanEastCoastEarthquakeDAO.sol
+[2025-04-05T09:14:22.499Z] Contract log saved to /Users/hank.tsai/Desktop/flashDAO/logs/contracts/earthquake_2025-04-05T09-14-22-498Z.sol
+[2025-04-05T09:14:22.499Z] Generating factory contract for TaiwanEastCoastEarthquakeDAO
+[2025-04-05T09:14:22.500Z] Factory contract saved to /Users/hank.tsai/Desktop/agent_gen_contracts/TaiwanEastCoastEarthquakeDAOFactory.sol
+[2025-04-05T09:14:22.500Z] Compiling contract...
+[2025-04-05T09:14:24.502Z] Compilation warnings: WARNING: You are currently using Node.js v23.10.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+[2025-04-05T09:14:24.503Z] Contract compiled successfully
+[2025-04-05T09:14:24.503Z] Deployment script saved to /Users/hank.tsai/Desktop/agent_gen_contracts/deploy_taiwaneastcoastearthquakedao.js
+[2025-04-05T09:14:24.503Z] 事件處理完成，準備部署。
+[2025-04-05T09:14:24.504Z] 部署命令: npx hardhat run ../agent_gen_contracts/deploy_taiwaneastcoastearthquakedao.js --network sepolia
+[2025-04-05T09:17:43.523Z] ==================================================
+[2025-04-05T09:17:43.524Z] 處理新事件: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T09:17:43.524Z] ==================================================
+[2025-04-05T09:17:43.524Z] 生成智能合約: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T09:17:43.525Z] 連接Claude API並開始生成...
+[2025-04-05T09:17:43.525Z] ========== 開始生成智能合約 ==========
+[2025-04-05T09:18:19.147Z] 
+========== 智能合約生成完成 ==========
+[2025-04-05T09:18:19.147Z] 合約代碼長度: 4160 字元
+[2025-04-05T09:18:19.148Z] Extracted contract name from code: inherits
+[2025-04-05T09:18:19.149Z] Contract saved to /Users/hank.tsai/Desktop/agent_gen_contracts/inherits.sol
+[2025-04-05T09:18:19.149Z] Contract log saved to /Users/hank.tsai/Desktop/flashDAO/logs/contracts/earthquake_2025-04-05T09-18-19-149Z.sol
+[2025-04-05T09:18:19.149Z] Generating factory contract for inherits
+[2025-04-05T09:18:19.150Z] Factory contract saved to /Users/hank.tsai/Desktop/agent_gen_contracts/inheritsFactory.sol
+[2025-04-05T09:18:19.150Z] Compiling contract...
+[2025-04-05T09:18:21.184Z] Compilation warnings: WARNING: You are currently using Node.js v23.10.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+[2025-04-05T09:18:21.184Z] Contract compiled successfully
+[2025-04-05T09:18:21.185Z] Deployment script saved to /Users/hank.tsai/Desktop/agent_gen_contracts/deploy_inherits.js
+[2025-04-05T09:18:21.185Z] 事件處理完成，準備部署。
+[2025-04-05T09:18:21.185Z] 部署命令: npx hardhat run ../agent_gen_contracts/deploy_inherits.js --network sepolia
+[2025-04-05T09:27:09.055Z] ==================================================
+[2025-04-05T09:27:09.056Z] 處理新事件: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T09:27:09.056Z] ==================================================
+[2025-04-05T09:27:09.056Z] 生成智能合約: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T09:27:09.056Z] 連接Claude API並開始生成...
+[2025-04-05T09:27:09.056Z] ========== 開始生成智能合約 ==========
+[2025-04-05T09:27:52.028Z] 
+========== 智能合約生成完成 ==========
+[2025-04-05T09:27:52.029Z] 合約代碼長度: 3988 字元
+[2025-04-05T09:27:52.029Z] Extracted contract name from code: for
+[2025-04-05T09:27:52.030Z] Contract saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T09-27-52-030Z.sol
+[2025-04-05T09:27:52.031Z] Contract log saved to /Users/hank.tsai/Desktop/flashDAO/logs/contracts/earthquake_2025-04-05T09-27-52-030Z.sol
+[2025-04-05T09:27:52.032Z] Generating factory contract for for
+[2025-04-05T09:27:52.032Z] Factory contract saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T09-27-52-030Z_factory.sol
+[2025-04-05T09:27:52.032Z] Compiling contract...
+[2025-04-05T09:27:53.959Z] Compilation warnings: WARNING: You are currently using Node.js v23.10.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+[2025-04-05T09:27:53.959Z] Contract compiled successfully
+[2025-04-05T09:27:53.959Z] Deployment script saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T09-27-52-030Z_deploy.js
+[2025-04-05T09:27:53.960Z] 事件處理完成，準備部署。
+[2025-04-05T09:27:53.960Z] 部署命令: npx hardhat run contract/agent_gen_contracts/earthquake_2025-04-05T09-27-52-030Z_deploy.js --network sepolia
+[2025-04-05T11:34:30.618Z] 開始為 earthquake 事件生成合約...
+[2025-04-05T11:34:30.618Z] 選擇事件: Earthquake - Hualien Earthquake
+[2025-04-05T11:34:30.619Z] 嚴重程度: 8/10
+[2025-04-05T11:34:30.619Z] 位置: Hualien County, Taiwan
+[2025-04-05T11:34:30.620Z] ==================================================
+[2025-04-05T11:34:30.620Z] 處理新事件: Earthquake - Hualien Earthquake
+[2025-04-05T11:34:30.620Z] ==================================================
+[2025-04-05T11:34:30.621Z] 生成智能合約: Earthquake - Hualien Earthquake
+[2025-04-05T11:34:30.621Z] 連接Claude API並開始生成...
+[2025-04-05T11:34:30.621Z] ========== 開始生成智能合約 ==========
+[2025-04-05T11:34:31.505Z] API錯誤: 401 Unauthorized
+[2025-04-05T11:34:31.505Z] {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}
+[2025-04-05T11:34:31.505Z] 生成合約時出錯: API錯誤: 401
+[2025-04-05T11:34:31.505Z] 處理事件時發生錯誤: API錯誤: 401
+[2025-04-05T11:34:31.505Z] ❌ 合約生成過程中出現錯誤。
+[2025-04-05T11:52:18.880Z] ==================================================
+[2025-04-05T11:52:18.881Z] 處理新事件: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T11:52:18.881Z] ==================================================
+[2025-04-05T11:52:18.881Z] 生成智能合約: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T11:52:18.881Z] 連接Claude API並開始生成...
+[2025-04-05T11:52:18.881Z] ========== 開始生成智能合約 ==========
+[2025-04-05T11:53:04.701Z] 
+========== 智能合約生成完成 ==========
+[2025-04-05T11:53:04.701Z] 合約代碼長度: 4353 字元
+[2025-04-05T11:53:04.702Z] Extracted contract name from code: TaiwanEastCoastEarthquakeDAO
+[2025-04-05T11:53:04.702Z] Contract saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T11-53-04-702Z.sol
+[2025-04-05T11:53:04.704Z] Contract log saved to /Users/hank.tsai/Desktop/flashDAO/logs/contracts/earthquake_2025-04-05T11-53-04-702Z.sol
+[2025-04-05T11:53:04.704Z] Generating factory contract for TaiwanEastCoastEarthquakeDAO
+[2025-04-05T11:53:04.704Z] Factory contract saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T11-53-04-702Z_factory.sol
+[2025-04-05T11:53:04.704Z] Compiling contract...
+[2025-04-05T11:53:06.727Z] Compilation warnings: WARNING: You are currently using Node.js v23.10.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+[2025-04-05T11:53:06.727Z] Contract compiled successfully
+[2025-04-05T11:53:06.728Z] Deployment script saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T11-53-04-702Z_deploy.js
+[2025-04-05T11:53:06.728Z] 事件處理完成，準備部署。
+[2025-04-05T11:53:06.728Z] 部署命令: npx hardhat run contract/agent_gen_contracts/earthquake_2025-04-05T11-53-04-702Z_deploy.js --network sepolia
+[2025-04-05T11:55:32.220Z] ==================================================
+[2025-04-05T11:55:32.220Z] 處理新事件: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T11:55:32.220Z] ==================================================
+[2025-04-05T11:55:32.221Z] 生成智能合約: Earthquake - Taiwan East Coast Earthquake
+[2025-04-05T11:55:32.221Z] 連接Claude API並開始生成...
+[2025-04-05T11:55:32.221Z] ========== 開始生成智能合約 ==========
+[2025-04-05T11:56:11.775Z] 
+========== 智能合約生成完成 ==========
+[2025-04-05T11:56:11.777Z] 合約代碼長度: 4168 字元
+[2025-04-05T11:56:11.778Z] Extracted contract name from code: for
+[2025-04-05T11:56:11.779Z] Contract saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T11-56-11-778Z.sol
+[2025-04-05T11:56:11.780Z] Contract log saved to /Users/hank.tsai/Desktop/flashDAO/logs/contracts/earthquake_2025-04-05T11-56-11-778Z.sol
+[2025-04-05T11:56:11.781Z] Generating factory contract for for
+[2025-04-05T11:56:11.781Z] Factory contract saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T11-56-11-778Z_factory.sol
+[2025-04-05T11:56:11.781Z] Compiling contract...
+[2025-04-05T11:56:13.638Z] Compilation warnings: WARNING: You are currently using Node.js v23.10.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+[2025-04-05T11:56:13.638Z] Contract compiled successfully
+[2025-04-05T11:56:13.639Z] Deployment script saved to /Users/hank.tsai/Desktop/flashDAO/contract/agent_gen_contracts/earthquake_2025-04-05T11-56-11-778Z_deploy.js
+[2025-04-05T11:56:13.639Z] 事件處理完成，準備部署。
+[2025-04-05T11:56:13.639Z] 部署命令: npx hardhat run contract/agent_gen_contracts/earthquake_2025-04-05T11-56-11-778Z_deploy.js --network sepolia

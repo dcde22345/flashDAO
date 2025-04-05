@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
+    "@typechain/hardhat": "^9.1.0",
+    "hardhat": "^2.22.19"
+  }
+}

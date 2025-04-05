@@ -7,7 +7,8 @@
     "test": "npx hardhat test",
     "start": "node scripts/eventListener.js",
     "generate": "node scripts/llmContractGenerator.js",
-    "compile": "npx hardhat compile"
+    "compile": "npx hardhat compile",
+    "deploy:base-sepolia": "npx hardhat run scripts/deploy_base.js --network baseSepolia"
   },
   "keywords": [
     "blockchain",
@@ -15,13 +16,15 @@
     "ethereum",
     "flow",
     "llm",
-    "agent"
+    "agent",
+    "base"
   ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^2.0.0",
     "@openzeppelin/hardhat-upgrades": "^3.0.2",
+    "@types/node": "^20.11.20",
     "hardhat": "^2.22.1"
   },
   "dependencies": {

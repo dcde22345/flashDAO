@@ -1,0 +1,19 @@
+<svg width="180" height="48" viewBox="0 0 180 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 (透明) -->
+  <rect width="180" height="48" fill="none" />
+  
+  <!-- 閃電標誌 -->
+  <g transform="translate(28, 24) scale(0.8)">
+    <path d="M-15,0 L-5,-18 L5,-10 L0,0 L10,0 L0,18 L-5,8 L-15,8 Z" fill="#3b82f6" />
+    <path d="M-15,0 L-5,-18 L5,-10 L0,0 L10,0 L0,18 L-5,8 L-15,8 Z" fill="none" stroke="#1e3a8a" stroke-width="1.5" />
+  </g>
+  
+  <!-- FlashDAO 文字 -->
+  <g fill="#1e3a8a" font-family="Arial, sans-serif" font-weight="bold">
+    <text x="48" y="29" font-size="20">Flash</text>
+    <text x="105" y="29" font-size="20" fill="#3b82f6">DAO</text>
+  </g>
+  
+  <!-- 底部標語 -->
+  <text x="48" y="40" font-size="8" fill="#4b5563" font-family="Arial, sans-serif">Decentralized Disaster Relief</text>
+</svg> 

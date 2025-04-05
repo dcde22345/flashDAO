@@ -1,0 +1,37 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景漸變 -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="800" height="400" fill="url(#bg-gradient)" />
+  
+  <!-- 裝飾圖案 -->
+  <path d="M0,150 Q200,200 400,150 T800,150 V400 H0 Z" fill="rgba(255, 255, 255, 0.05)" />
+  
+  <!-- 樹葉和地球圖標 -->
+  <g transform="translate(400, 170) scale(1.2)">
+    <!-- 地球 -->
+    <circle cx="0" cy="0" r="45" fill="#0891b2" stroke="#ffffff" stroke-width="2" />
+    
+    <!-- 大陸 -->
+    <path d="M-30,-10 Q-20,-30 0,-25 T30,-10 Q40,0 30,20 T0,30 Q-20,25 -25,10 T-30,-10 Z" fill="#047857" />
+    <path d="M-15,-35 Q-5,-40 5,-35 T15,-25 Q10,-15 15,-5 T10,0 Q0,-5 -10,-10 T-15,-35 Z" fill="#047857" />
+    
+    <!-- 樹葉 -->
+    <g transform="translate(-50, -30) scale(0.8)">
+      <path d="M0,0 Q10,-20 20,-10 T40,-5 Q30,5 40,15 T30,30 Q20,25 10,30 T0,0 Z" fill="#4ade80" stroke="#16a34a" stroke-width="1" />
+    </g>
+    <g transform="translate(35, -35) scale(0.8)">
+      <path d="M0,0 Q10,-20 20,-10 T40,-5 Q30,5 40,15 T30,30 Q20,25 10,30 T0,0 Z" fill="#4ade80" stroke="#16a34a" stroke-width="1" />
+    </g>
+  </g>
+  
+  <!-- 文字 -->
+  <text x="400" y="280" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="white" text-anchor="middle">GreenDAO</text>
+  <text x="400" y="320" font-family="Arial, sans-serif" font-size="20" fill="rgba(255, 255, 255, 0.8)" text-anchor="middle">Climate Action Funding</text>
+</svg> 

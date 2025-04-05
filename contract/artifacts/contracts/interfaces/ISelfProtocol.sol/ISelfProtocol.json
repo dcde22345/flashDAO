@@ -45,7 +45,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "volunteer",
+          "name": "user",
           "type": "address"
         },
         {

@@ -9,157 +9,164 @@ import "./VolunteerRegistry.sol";
 
 /**
  * @title FlashDAOTreasury
- * @dev Treasury contract for FlashDAO with donation and refund mechanisms
+ * @dev Treasury contract for FlashDAO that handles donations and fund distribution
  */
 contract FlashDAOTreasury is AccessControl, ReentrancyGuard {
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     
     // External contracts
     IERC20 public usdcToken;
     FlashDAOToken public governanceToken;
     VolunteerRegistry public volunteerRegistry;
     
-    // Donation window
-    uint256 public constant REFUND_WINDOW = 7 days;
+    // Treasury state
+    bool public fundsDistributed;
+    uint256 public totalDonations;
     
-    struct Donation {
-        uint256 amount;
-        uint256 timestamp;
-        bool confirmed;
-        bool refunded;
-    }
+    // Donation tracking
+    mapping(address => uint256) public donations;
+    address[] private donorList;
+    mapping(address => bool) private isDonor;
     
-    // Donor => donationId => Donation
-    mapping(address => mapping(uint256 => Donation)) public donations;
-    mapping(address => uint256) public donationCount;
+    // Token calculation constants
+    uint256 public constant BASE_AMOUNT = 1000 * 10**18; // 1000 tokens base
+    uint256 public constant SCALE_FACTOR = 100 * 10**6;  // 100 USDC scaling
     
     // Events
-    event DonationReceived(address indexed donor, uint256 indexed donationId, uint256 amount);
-    event DonationConfirmed(address indexed donor, uint256 indexed donationId, uint256 tokensMinted);
-    event DonationRefunded(address indexed donor, uint256 indexed donationId, uint256 amount);
-    event FundsTransferred(address indexed recipient, uint256 amount);
+    event DonationReceived(address indexed donor, uint256 amount, uint256 tokensMinted);
+    event FundsDistributed(address recipient, uint256 amount);
+    event RefundClaimed(address indexed donor, uint256 amount);
     
     /**
      * @dev Constructor
-     * @param _usdcToken Address of the USDC token
-     * @param _governanceToken Address of the governance token
-     * @param _volunteerRegistry Address of the volunteer registry
+     * @param _usdcAddress Address of the USDC token
+     * @param _governanceTokenAddress Address of the governance token
+     * @param _volunteerRegistryAddress Address of the volunteer registry
      */
     constructor(
-        address _usdcToken,
-        address _governanceToken,
-        address _volunteerRegistry
+        address _usdcAddress,
+        address _governanceTokenAddress,
+        address _volunteerRegistryAddress
     ) {
-        require(_usdcToken != address(0), "Invalid USDC address");
-        require(_governanceToken != address(0), "Invalid governance token address");
-        require(_volunteerRegistry != address(0), "Invalid volunteer registry address");
+        require(_usdcAddress != address(0), "Invalid USDC address");
+        require(_governanceTokenAddress != address(0), "Invalid token address");
+        require(_volunteerRegistryAddress != address(0), "Invalid registry address");
         
-        usdcToken = IERC20(_usdcToken);
-        governanceToken = FlashDAOToken(_governanceToken);
-        volunteerRegistry = VolunteerRegistry(_volunteerRegistry);
+        usdcToken = IERC20(_usdcAddress);
+        governanceToken = FlashDAOToken(_governanceTokenAddress);
+        volunteerRegistry = VolunteerRegistry(_volunteerRegistryAddress);
         
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
     }
     
     /**
-     * @dev Allow users to donate USDC
+     * @dev Donate USDC and receive governance tokens
      * @param amount Amount of USDC to donate
      */
     function donate(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be greater than 0");
+        require(!fundsDistributed, "Funds already distributed");
         
-        // Transfer USDC to this contract
+        // Transfer USDC from sender to this contract
         require(usdcToken.transferFrom(msg.sender, address(this), amount), "USDC transfer failed");
         
-        // Create donation record
-        uint256 id = donationCount[msg.sender]++;
-        donations[msg.sender][id] = Donation({
-            amount: amount,
-            timestamp: block.timestamp,
-            confirmed: false,
-            refunded: false
-        });
+        // Calculate tokens based on logarithmic curve
+        uint256 tokenAmount = calculateTokenAmount(amount);
         
-        emit DonationReceived(msg.sender, id, amount);
+        // Add donor to list if not already there
+        if (!isDonor[msg.sender]) {
+            donorList.push(msg.sender);
+            isDonor[msg.sender] = true;
+        }
+        
+        // Update donation tracking
+        donations[msg.sender] += amount;
+        totalDonations += amount;
+        
+        // Mint governance tokens to donor
+        governanceToken.mint(msg.sender, tokenAmount);
+        
+        emit DonationReceived(msg.sender, amount, tokenAmount);
     }
     
     /**
-     * @dev Admin confirms donation and mints governance tokens
-     * @param donor Address of the donor
-     * @param donationId ID of the donation
+     * @dev Distribute funds to a recipient (can only be called by governance)
+     * @param recipient Address to send funds to
      */
-    function confirmDonation(address donor, uint256 donationId) external onlyRole(ADMIN_ROLE) nonReentrant {
-        Donation storage donation = donations[donor][donationId];
-        require(!donation.confirmed, "Donation already confirmed");
-        require(!donation.refunded, "Donation already refunded");
+    function distributeFunds(address recipient) external onlyRole(GOVERNANCE_ROLE) nonReentrant {
+        require(!fundsDistributed, "Funds already distributed");
+        require(totalDonations > 0, "No funds to distribute");
+        require(recipient != address(0), "Invalid recipient address");
+        require(volunteerRegistry.isApprovedVolunteer(recipient), "Recipient must be approved volunteer");
         
-        donation.confirmed = true;
+        uint256 balance = usdcToken.balanceOf(address(this));
+        require(balance > 0, "Treasury is empty");
         
-        // Mint governance tokens (even for volunteers, though they can't use them)
-        uint256 tokenAmount = governanceToken.mintFromDonation(donor, donation.amount);
+        fundsDistributed = true;
         
-        emit DonationConfirmed(donor, donationId, tokenAmount);
+        // Transfer all USDC to the recipient
+        require(usdcToken.transfer(recipient, balance), "USDC transfer failed");
+        
+        emit FundsDistributed(recipient, balance);
     }
     
     /**
-     * @dev Allow donors to refund unconfirmed donations after refund window
-     * @param donationId ID of the donation to refund
+     * @dev Allow donor to claim refund if no funds have been distributed yet
      */
-    function refundDonation(uint256 donationId) external nonReentrant {
-        Donation storage donation = donations[msg.sender][donationId];
-        require(!donation.confirmed, "Donation already confirmed");
-        require(!donation.refunded, "Already refunded");
-        require(block.timestamp > donation.timestamp + REFUND_WINDOW, "Refund window not passed");
+    function claimRefund() external nonReentrant {
+        require(!fundsDistributed, "Funds already distributed");
+        require(isDonor[msg.sender], "Not a donor");
         
-        uint256 amount = donation.amount;
-        donation.refunded = true;
+        uint256 donationAmount = donations[msg.sender];
+        require(donationAmount > 0, "No donation to refund");
         
-        require(usdcToken.transfer(msg.sender, amount), "USDC transfer failed");
+        // Update state before transfer
+        donations[msg.sender] = 0;
+        totalDonations -= donationAmount;
         
-        emit DonationRefunded(msg.sender, donationId, amount);
+        // Transfer USDC back to donor
+        require(usdcToken.transfer(msg.sender, donationAmount), "USDC transfer failed");
+        
+        emit RefundClaimed(msg.sender, donationAmount);
     }
     
     /**
-     * @dev Execute fund transfer to a recipient (called by governance)
-     * @param recipient Address to receive funds
-     * @param amount Amount to transfer
+     * @dev Grant GOVERNANCE_ROLE to an address (can only be called by admin)
+     * @param governanceAddress Address to grant the role to
      */
-    function executeTransfer(address recipient, uint256 amount) external onlyRole(GOVERNANCE_ROLE) nonReentrant {
-        require(recipient != address(0), "Invalid recipient");
-        require(amount > 0, "Amount must be greater than 0");
-        require(amount <= usdcToken.balanceOf(address(this)), "Insufficient balance");
-        
-        require(usdcToken.transfer(recipient, amount), "Transfer failed");
-        
-        emit FundsTransferred(recipient, amount);
+    function setGovernance(address governanceAddress) external onlyRole(ADMIN_ROLE) {
+        require(governanceAddress != address(0), "Invalid governance address");
+        _grantRole(GOVERNANCE_ROLE, governanceAddress);
     }
     
     /**
-     * @dev Get pledge amount for a specific donor
-     * @param donor Address of the donor
-     * @param donationId ID of the donation
+     * @dev Calculate token amount using logarithmic curve
+     * @param donationAmount Amount of USDC donated (6 decimals)
+     * @return Token amount (18 decimals)
      */
-    function getDonation(address donor, uint256 donationId) external view returns (
-        uint256 amount,
-        uint256 timestamp,
-        bool confirmed,
-        bool refunded
-    ) {
-        Donation storage donation = donations[donor][donationId];
-        return (
-            donation.amount,
-            donation.timestamp,
-            donation.confirmed,
-            donation.refunded
-        );
+    function calculateTokenAmount(uint256 donationAmount) public pure returns (uint256) {
+        // Simple linear calculation for this implementation
+        // In a real implementation, this would use a logarithmic curve
+        return donationAmount * 10 * 10**12; // 10 tokens per USDC, scaled from 6 to 18 decimals
     }
     
     /**
-     * @dev Get USDC balance of treasury
+     * @dev Get the total number of donors
+     * @return Number of donors
      */
-    function getBalance() external view returns (uint256) {
-        return usdcToken.balanceOf(address(this));
+    function getDonorCount() external view returns (uint256) {
+        return donorList.length;
+    }
+    
+    /**
+     * @dev Get donor address by index
+     * @param index Index in the donor list
+     * @return Donor address
+     */
+    function getDonorByIndex(uint256 index) external view returns (address) {
+        require(index < donorList.length, "Index out of bounds");
+        return donorList[index];
     }
 } 

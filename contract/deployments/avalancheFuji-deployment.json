@@ -1,0 +1,15 @@
+{
+  "network": "avalancheFuji",
+  "deployer": "0xef976497b21DfeE0c5daDCef2fb5fe79E204f202",
+  "timestamp": "2025-04-05T16:37:57.520Z",
+  "contracts": {
+    "usdc": "0x58296BdcfC5061905ba5ED52534BD1330067B06F",
+    "selfProtocol": "0xB1614282AfB92D9E596Ab69C6bcb75384437F1a1",
+    "factory": "0x397Aa01F552365899D44174025CCE6D28184875B"
+  },
+  "sourceNetwork": {
+    "name": "baseSepolia",
+    "chainId": 84532,
+    "factoryAddress": "0x9d42a0BCaAAe90042C2528756abAe57B7114C671"
+  }
+}

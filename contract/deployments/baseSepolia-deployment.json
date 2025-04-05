@@ -1,0 +1,14 @@
+{
+  "network": "baseSepolia",
+  "deployer": "0xef976497b21DfeE0c5daDCef2fb5fe79E204f202",
+  "contracts": {
+    "mockUSDC": "0x99E0413777430908714201418AD4681a9E027d3F",
+    "mockSelfProtocol": "0x74356940953F9DbA221A714aecDC76c63a102220",
+    "flashDAOToken": "0x148f3d7939b0925243A20E87bf28e1AC29BD1240",
+    "volunteerRegistry": "0x883D688eE5c9dfEE3ec04cB793264Dca1F030C8C",
+    "flashDAOTreasury": "0x0FCcC9f8B364b50aeD47310fDACc0498D91FaD06",
+    "flashDAOGovernance": "0xA9b0E8B09452d28c56908CB11DCa19e97cBA89c5",
+    "multiChainDAOFactory": "0x9d42a0BCaAAe90042C2528756abAe57B7114C671"
+  },
+  "timestamp": "2025-04-05T16:36:49.127Z"
+}

@@ -1,41 +1,65 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/ISelfProtocol.sol";
 
 /**
  * @title MockSelfProtocol
- * @dev Mock implementation of the Self Protocol for testing
+ * @dev 用於測試的Self Protocol模擬合約
  */
-contract MockSelfProtocol is ISelfProtocol {
+contract MockSelfProtocol is Ownable, ISelfProtocol {
     mapping(address => bool) public verifiedUsers;
     mapping(address => uint256) public verificationTimestamps;
     mapping(address => uint256) public tokenBalances;
     
+    constructor() Ownable(msg.sender) {}
+    
     /**
-     * @dev Verify a user's credentials for testing
-     * @param volunteer Address of the volunteer
-     * @param credentials Encoded credentials data (not used in mock)
-     * @return Always returns true for testing
+     * @dev 驗證用戶憑證
+     * @param user 用戶地址
+     * @param credentials 憑證數據 (在模擬合約中不使用)
+     * @return 驗證是否通過
      */
-    function verifyCredentials(address volunteer, bytes calldata credentials) external view override returns (bool) {
-        // In mock version, always return true for testing
-        return true;
+    function verifyCredentials(address user, bytes calldata credentials) external view override returns (bool) {
+        // 在模擬環境中，僅檢查用戶是否已驗證
+        return verifiedUsers[user];
     }
     
     /**
-     * @dev Manually set a user as verified (for testing)
-     * @param user Address to verify
+     * @dev 設置用戶驗證狀態
+     * @param user 用戶地址
+     * @param isVerified 驗證狀態
      */
-    function setVerified(address user) external {
-        verifiedUsers[user] = true;
-        verificationTimestamps[user] = block.timestamp;
+    function setUserVerified(address user, bool isVerified) external onlyOwner {
+        verifiedUsers[user] = isVerified;
+        if (isVerified) {
+            verificationTimestamps[user] = block.timestamp;
+        } else {
+            verificationTimestamps[user] = 0;
+        }
+    }
+    
+    /**
+     * @dev 批量設置用戶驗證狀態
+     * @param users 用戶地址數組
+     * @param isVerified 驗證狀態
+     */
+    function batchSetUserVerified(address[] calldata users, bool isVerified) external onlyOwner {
+        for (uint256 i = 0; i < users.length; i++) {
+            verifiedUsers[users[i]] = isVerified;
+            if (isVerified) {
+                verificationTimestamps[users[i]] = block.timestamp;
+            } else {
+                verificationTimestamps[users[i]] = 0;
+            }
+        }
     }
     
     /**
      * @dev Checks if an address has a verified identity
      * @param user Address to check
-     * @return hasIdentity True if the address has a verified identity
+     * @return True if the address has a verified identity
      */
     function hasVerifiedIdentity(address user) external view override returns (bool) {
         return verifiedUsers[user];

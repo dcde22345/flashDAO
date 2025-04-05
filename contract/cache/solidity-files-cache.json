@@ -45,8 +45,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/interfaces/ISelfProtocol.sol": {
-      "lastModificationDate": 1743861783024,
-      "contentHash": "259e51d0c51ce7cfcd77bb921c961562",
+      "lastModificationDate": 1743865482795,
+      "contentHash": "719cb15ade3b1de3f78bcb812b3bf59b",
       "sourceName": "contracts/interfaces/ISelfProtocol.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -684,8 +684,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/mocks/MockSelfProtocol.sol": {
-      "lastModificationDate": 1743862151827,
-      "contentHash": "c83e6ef2cc721f340d843bf24b3b2ba8",
+      "lastModificationDate": 1743870446975,
+      "contentHash": "30b3280bdb6d9a898ea29ea09a0d152c",
       "sourceName": "contracts/mocks/MockSelfProtocol.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -712,6 +712,7 @@
         }
       },
       "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
         "../interfaces/ISelfProtocol.sol"
       ],
       "versionPragmas": [
@@ -722,8 +723,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/VolunteerRegistry.sol": {
-      "lastModificationDate": 1743863069494,
-      "contentHash": "5dbd620fc94f44e7a2564671764f0fbd",
+      "lastModificationDate": 1743865720289,
+      "contentHash": "c20d2ac5c25d9a0f81914ade97c2aaae",
       "sourceName": "contracts/VolunteerRegistry.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -761,8 +762,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/MultiChainDAOFactory.sol": {
-      "lastModificationDate": 1743854989019,
-      "contentHash": "645115230c8bb8546c943594f5d5f109",
+      "lastModificationDate": 1743865600287,
+      "contentHash": "e3f99f27e61cf454c2a74b6c57596519",
       "sourceName": "contracts/MultiChainDAOFactory.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -803,8 +804,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/FlashDAOToken.sol": {
-      "lastModificationDate": 1743854989019,
-      "contentHash": "e555f59b24837dda12c18ea7ee374abf",
+      "lastModificationDate": 1743865651291,
+      "contentHash": "9fbe6b260d7984126f5cbc2dcc06d1d9",
       "sourceName": "contracts/FlashDAOToken.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -832,8 +833,7 @@
       },
       "imports": [
         "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/access/AccessControl.sol",
-        "@openzeppelin/contracts/utils/math/Math.sol"
+        "@openzeppelin/contracts/access/AccessControl.sol"
       ],
       "versionPragmas": [
         "^0.8.28"
@@ -843,8 +843,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/FlashDAOTreasury.sol": {
-      "lastModificationDate": 1743862868416,
-      "contentHash": "2a7d2d2973409a8a551ed765d08a797d",
+      "lastModificationDate": 1743865755290,
+      "contentHash": "92d57de0f7f7d82eb3376b298e1e494f",
       "sourceName": "contracts/FlashDAOTreasury.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -885,8 +885,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/FlashDAOGovernance.sol": {
-      "lastModificationDate": 1743862868415,
-      "contentHash": "c8a9643b549f18b0b305a0307882db1f",
+      "lastModificationDate": 1743865785290,
+      "contentHash": "a9c1c2380a35ab1c79734241ae3d82cc",
       "sourceName": "contracts/FlashDAOGovernance.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -917,6 +917,7 @@
         "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
         "./interfaces/ISelfProtocol.sol",
+        "./FlashDAOToken.sol",
         "./VolunteerRegistry.sol"
       ],
       "versionPragmas": [
@@ -927,8 +928,8 @@
       ]
     },
     "/Users/hank.tsai/Desktop/flashDAO/contract/contracts/mocks/MockUSDC.sol": {
-      "lastModificationDate": 1743862127161,
-      "contentHash": "cda2a8dbade935f0cd51805307a80387",
+      "lastModificationDate": 1743865456586,
+      "contentHash": "a5dfb08e085e596bc19c8c30aa24b280",
       "sourceName": "contracts/mocks/MockUSDC.sol",
       "solcConfig": {
         "version": "0.8.28",

@@ -3,16 +3,16 @@ pragma solidity ^0.8.28;
 
 /**
  * @title ISelfProtocol
- * @dev Interface for the Self Protocol integration for volunteer verification
+ * @dev Self Protocol接口，用於志願者身份驗證
  */
 interface ISelfProtocol {
     /**
-     * @dev Verifies the credentials of a volunteer
-     * @param volunteer Address of the volunteer
-     * @param credentials Encoded credentials data
-     * @return valid Whether the credentials are valid
+     * @dev 驗證用戶憑證
+     * @param user 用戶地址
+     * @param credentials 憑證數據
+     * @return 是否驗證通過
      */
-    function verifyCredentials(address volunteer, bytes calldata credentials) external view returns (bool);
+    function verifyCredentials(address user, bytes calldata credentials) external view returns (bool);
     
     /**
      * @dev Checks if an address has a verified identity

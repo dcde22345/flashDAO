@@ -1,17 +1,70 @@
-/contract/node_modules
-/contract.env
+# Node.js 相關
+node_modules/
+package-lock.json
 
-# Hardhat files
-/contract/cache
-/contract/artifacts
+# Agent
+agent/node_modules
+agent/package-lock.json
+agent/logs
+agent/.env
+agent/.env-contract
 
-# TypeChain files
-/contract/typechain
-/contract/typechain-types
+# Contract
+contract/node_modules
+contract/package-lock.json
+contract/cache
+contract/agent_gen_contracts
 
-# solidity-coverage files
-/contract/coverage
-/contract/coverage.json
+# 環境變數和機密檔案
+.env
+.env.*
+!.env.example
 
-# Hardhat Ignition default folder for deployments against a local node
-/contract/ignition/deployments/chain-31337
+# 合約生成檔案
+contract/agent_gen_contracts/*
+logs/
+logs/**/*.sol
+logs/**/*.log
+
+# IDE 和編輯器
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# 建置輸出
+dist/
+build/
+out/
+.next/
+.vercel/
+
+# 測試相關
+.nyc_output/
+.coverage/
+coverage/
+
+# 臨時檔案
+*.swp
+*.swo
+.DS_Store
+.directory
+*~
+*.log
+temp/
+tmp/
+
+# 錢包相關
+**/metamask_phares.txt
+**/pharse.txt
+**/wallet.json
+
+# 其他
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*

@@ -1,0 +1,47 @@
+{
+  "name": "flashdao",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FlashDAO - LLM powered DAO creation system",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "contract:compile": "cd contract && npx hardhat compile",
+    "contract:deploy": "cd contract && npx hardhat run scripts/deploy.js --network sepolia",
+    "contract:verify": "cd contract && npx hardhat verify --network sepolia",
+    "generate:contract": "node scripts/ai/llmContractGenerator.js",
+    "test:claude:stream": "node scripts/utils/claude-tests/testClaudeStream.js",
+    "test:claude:simple": "node scripts/utils/claude-tests/testClaudeStreamSimple.js",
+    "test:claude:fetch": "node scripts/utils/claude-tests/testClaudeFetch.js",
+    "dao:generate": "node scripts/ai/llmContractGeneratorStream.js",
+    "test": "cd contract && npx hardhat test",
+    "test:env": "node scripts/utils/test-env.js",
+    "test:claude": "node scripts/utils/claude-tests/testClaude.js",
+    "compile": "cd contract && npx hardhat compile",
+    "start:listener": "node scripts/monitoring/eventListener.js",
+    "start:payment": "node scripts/payments/circlePaymentHandler.js",
+    "generate:payment": "node scripts/payments/createPaymentLink.js",
+    "monitor:earthquake": "node scripts/monitoring/earthquakeAgent.js",
+    "simulate:earthquake": "cd contract && npx hardhat run ../scripts/monitoring/simulateEarthquake.js",
+    "deploy": "cd contract && npx hardhat run ../scripts/contracts/deployImprovedFlashDAO.js"
+  },
+  "keywords": [
+    "blockchain",
+    "dao",
+    "ethereum",
+    "flow",
+    "llm",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3"
+  }
+} 

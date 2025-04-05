@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./FlashDAO.sol";
@@ -13,13 +12,12 @@ import "./FlashDAO.sol";
  * @dev NFT rewards for FlashDAO donors and volunteers
  */
 contract FlashDAORewards is ERC721Enumerable, AccessControl {
-    using Counters for Counters.Counter;
     using Strings for uint256;
     
     bytes32 public constant DAO_ROLE = keccak256("DAO_ROLE");
     
-    // Token ID counter
-    Counters.Counter private _tokenIdCounter;
+    // Token ID counter (replacing Counters library)
+    uint256 private _nextTokenId;
     
     // NFT Types
     enum NFTType { DONOR, VOLUNTEER }
@@ -85,8 +83,7 @@ contract FlashDAORewards is ERC721Enumerable, AccessControl {
         }
         
         if (reachedMilestone) {
-            uint256 tokenId = _tokenIdCounter.current();
-            _tokenIdCounter.increment();
+            uint256 tokenId = _nextTokenId++;
             
             _mint(_donor, tokenId);
             
@@ -109,8 +106,7 @@ contract FlashDAORewards is ERC721Enumerable, AccessControl {
     function mintVolunteerReward(address _volunteer, string memory _disasterName) external onlyRole(DAO_ROLE) {
         totalVolunteerRoles[_volunteer]++;
         
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
+        uint256 tokenId = _nextTokenId++;
         
         _mint(_volunteer, tokenId);
         
@@ -130,7 +126,7 @@ contract FlashDAORewards is ERC721Enumerable, AccessControl {
      * @return Token metadata as JSON string
      */
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-        require(_exists(_tokenId), "Token does not exist");
+        require(_ownerOf(_tokenId) != address(0), "Token does not exist");
         
         NFTMetadata memory metadata = tokenMetadata[_tokenId];
         string memory nftTypeStr = metadata.nftType == NFTType.DONOR ? "Donor" : "Volunteer";

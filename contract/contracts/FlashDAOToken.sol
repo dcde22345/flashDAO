@@ -57,30 +57,54 @@ contract FlashDAOToken is ERC20, AccessControl {
      */
     function calculateTokenAmount(uint256 donationAmount) public pure returns (uint256) {
         // Scale to handle USDC's 6 decimals vs ERC20 18 decimals
-        uint256 scaledAmount = (donationAmount * 10**12); // Scale to 18 decimals
+        uint256 scaledAmount = donationAmount * 10**12; // Scale to 18 decimals
         
-        // Calculate (donation / SCALE_FACTOR)
-        uint256 x = (scaledAmount * LN_SCALING) / SCALE_FACTOR;
+        // Ensure we don't overflow when scaling
+        if (scaledAmount < donationAmount) {
+            // If overflow, cap at maximum value
+            return BASE_AMOUNT;
+        }
+        
+        // Calculate (donation / SCALE_FACTOR) with protection against division by zero
+        uint256 x;
+        if (SCALE_FACTOR > 0) {
+            x = (scaledAmount * LN_SCALING) / SCALE_FACTOR;
+        } else {
+            return 0;
+        }
         
         // If x is very small, return linear approximation
         if (x < LN_SCALING / 100) {
             return (BASE_AMOUNT * x) / LN_SCALING;
         }
         
-        // Otherwise, use logarithmic formula
+        // Otherwise, use logarithmic formula with unchecked math for Taylor series
         // ln(1+x) approximation using Taylor series
-        uint256 term1 = x;
-        uint256 term2 = (x * x) / (2 * LN_SCALING);
-        uint256 term3 = (x * x * x) / (3 * LN_SCALING * LN_SCALING);
-        
         uint256 lnResult;
-        if (term1 > term2) {
-            lnResult = term1 - term2;
-            if (term3 < LN_SCALING) {
-                lnResult += term3;
+        
+        unchecked {
+            uint256 term1 = x;
+            
+            // Avoid overflow in term calculations
+            if (x <= LN_SCALING) { // Only calculate if x is reasonable
+                uint256 xSquared = (x * x) / LN_SCALING;
+                uint256 term2 = xSquared / 2;
+                
+                if (term1 > term2) {
+                    lnResult = term1 - term2;
+                    
+                    // Only calculate term3 if xSquared is not too large
+                    if (xSquared <= LN_SCALING) {
+                        uint256 term3 = (xSquared * x) / (3 * LN_SCALING);
+                        if (term3 < LN_SCALING) {
+                            lnResult += term3;
+                        }
+                    }
+                }
+            } else {
+                // For very large x, return maximum value
+                return BASE_AMOUNT;
             }
-        } else {
-            lnResult = 0; // Avoid underflow
         }
         
         return (BASE_AMOUNT * lnResult) / LN_SCALING;

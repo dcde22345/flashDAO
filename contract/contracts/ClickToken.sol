@@ -16,7 +16,7 @@ contract ClickToken is ERC20, ERC20Pausable, Ownable {
         uint256 value;
     }
 
-    constructor() ERC20("ClickToken", "CTK") Ownable(msg.sender) {}
+    constructor() ERC20("ClickToken", "CTK") Ownable() {}
 
     function pause() public onlyOwner {
         _pause();
@@ -31,7 +31,7 @@ contract ClickToken is ERC20, ERC20Pausable, Ownable {
         _mint(_to, 1 ether);
     }
 
-    function _update(
+    function _beforeTokenTransfer(
         address from,
         address to,
         uint256 value
@@ -50,7 +50,7 @@ contract ClickToken is ERC20, ERC20Pausable, Ownable {
 
         scores.set(to, toPrevScore + value);
 
-        super._update(from, to, value);
+        super._beforeTokenTransfer(from, to, value);
     }
 
     function getScore(address _address) public view returns (uint256) {

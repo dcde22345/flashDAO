@@ -2,269 +2,246 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./FlashDAOToken.sol";
-import "./FlashDAOTreasury.sol";
+import "./interfaces/ISelfProtocol.sol";
 import "./VolunteerRegistry.sol";
 
 /**
  * @title FlashDAOGovernance
- * @dev Governance contract for FlashDAO with volunteer election mechanism
+ * @dev Governance contract for FlashDAO with voting and fund distribution
  */
 contract FlashDAOGovernance is AccessControl, ReentrancyGuard {
-    // Roles
+    // Access roles
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     
-    // External contracts
-    FlashDAOToken public governanceToken;
-    FlashDAOTreasury public treasury;
+    // Contracts
+    IERC20 public governanceToken;
+    IERC20 public usdcToken;
     VolunteerRegistry public volunteerRegistry;
+    ISelfProtocol public selfProtocol;
     
-    // Election counter
-    uint256 public electionCount;
+    // Governance configuration
+    uint256 public electionDuration;
+    uint256 public minimumQuorum; // Min percentage (out of 100) of tokens that must vote
     
-    // Default voting period (7 days)
-    uint256 public constant DEFAULT_VOTING_PERIOD = 7 days;
+    // Election status
+    uint256 public electionStartTime;
+    uint256 public electionEndTime;
+    bool public electionActive;
+    bool public electionConcluded;
     
-    enum ElectionState { Active, Completed }
+    // Voting tracking
+    mapping(address => uint256) public votesReceived; // Volunteer -> vote count
+    mapping(address => address) public voterChoices;  // Voter -> chosen volunteer
+    mapping(address => bool) public hasVoted;
+    uint256 public totalVotesCast;
+    address public electionWinner;
     
-    struct Election {
-        uint256 id;
-        string title;
-        string description;
-        uint256 startTime;
-        uint256 endTime;
-        bool completed;
-        uint256 winningVolunteerId;
-        uint256[] volunteerIds; // Array of volunteer IDs from registry
-        mapping(uint256 => uint256) volunteerVotes; // volunteerId => voteCount
-        mapping(address => bool) hasVoted; // Tracks if an address has voted
-    }
-    
-    // Election ID => Election
-    mapping(uint256 => Election) public elections;
+    // Fund tracking
+    uint256 public totalFundsRaised;
+    bool public fundsDistributed;
     
     // Events
-    event ElectionCreated(uint256 indexed electionId, string title, uint256 startTime, uint256 endTime);
-    event VolunteersAdded(uint256 indexed electionId, uint256[] volunteerIds);
-    event VoteCast(address indexed voter, uint256 indexed electionId, uint256 indexed volunteerId, uint256 votes);
-    event ElectionCompleted(uint256 indexed electionId, uint256 winningVolunteerId, address winner);
+    event ElectionStarted(uint256 startTime, uint256 endTime);
+    event VoteCast(address indexed voter, address indexed volunteer, uint256 votes);
+    event ElectionConcluded(address indexed winner, uint256 votes);
+    event FundsDistributed(address indexed recipient, uint256 amount);
+    event NoWinnerDeclared();
     
     /**
      * @dev Constructor
-     * @param _governanceToken Address of the governance token
-     * @param _treasury Address of the treasury
-     * @param _volunteerRegistry Address of the volunteer registry
+     * @param _governanceToken The governance token used for voting
+     * @param _usdcToken The USDC token used for donations
+     * @param _volunteerRegistry Registry of verified volunteers
+     * @param _selfProtocol Self Protocol for identity verification
+     * @param _admin Admin address
      */
     constructor(
         address _governanceToken,
-        address _treasury,
-        address _volunteerRegistry
+        address _usdcToken,
+        address _volunteerRegistry,
+        address _selfProtocol,
+        address _admin
     ) {
-        require(_governanceToken != address(0), "Invalid governance token address");
-        require(_treasury != address(0), "Invalid treasury address");
-        require(_volunteerRegistry != address(0), "Invalid volunteer registry address");
+        require(_governanceToken != address(0), "Invalid governance token");
+        require(_usdcToken != address(0), "Invalid USDC token");
+        require(_volunteerRegistry != address(0), "Invalid volunteer registry");
         
-        governanceToken = FlashDAOToken(_governanceToken);
-        treasury = FlashDAOTreasury(_treasury);
+        governanceToken = IERC20(_governanceToken);
+        usdcToken = IERC20(_usdcToken);
         volunteerRegistry = VolunteerRegistry(_volunteerRegistry);
+        selfProtocol = ISelfProtocol(_selfProtocol);
         
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(ADMIN_ROLE, msg.sender);
+        electionDuration = 7 days;
+        minimumQuorum = 10; // 10% minimum participation
         
-        // Grant GOVERNANCE_ROLE to this contract in treasury
-        FlashDAOTreasury(_treasury).grantRole(keccak256("GOVERNANCE_ROLE"), address(this));
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        _grantRole(ADMIN_ROLE, _admin);
     }
     
     /**
-     * @dev Create a new election
-     * @param title Title of the election
-     * @param description Description of the election
-     * @param duration Duration of the election in seconds (0 for default)
+     * @dev Start a new election
+     * @param _duration Duration in seconds
      */
-    function createElection(
-        string calldata title,
-        string calldata description,
-        uint256 duration
-    ) external onlyRole(ADMIN_ROLE) returns (uint256) {
-        require(bytes(title).length > 0, "Title cannot be empty");
+    function startElection(uint256 _duration) external onlyRole(ADMIN_ROLE) {
+        require(!electionActive, "Election already active");
+        require(_duration > 0, "Duration must be greater than 0");
         
-        uint256 electionId = electionCount++;
+        electionDuration = _duration;
+        electionStartTime = block.timestamp;
+        electionEndTime = electionStartTime + _duration;
+        electionActive = true;
+        electionConcluded = false;
+        totalVotesCast = 0;
+        fundsDistributed = false;
         
-        Election storage election = elections[electionId];
-        election.id = electionId;
-        election.title = title;
-        election.description = description;
-        election.startTime = block.timestamp;
-        election.endTime = block.timestamp + (duration > 0 ? duration : DEFAULT_VOTING_PERIOD);
-        election.completed = false;
-        
-        emit ElectionCreated(electionId, title, election.startTime, election.endTime);
-        return electionId;
+        emit ElectionStarted(electionStartTime, electionEndTime);
     }
     
     /**
-     * @dev Add volunteers to an election
-     * @param electionId ID of the election
-     * @param volunteerIndices Array of volunteer indices from registry
+     * @dev Vote for a volunteer
+     * @param _volunteer Address of the volunteer to vote for
      */
-    function addVolunteersToElection(uint256 electionId, uint256[] calldata volunteerIndices) 
-        external onlyRole(ADMIN_ROLE) 
-    {
-        require(getElectionState(electionId) == ElectionState.Active, "Election not active");
+    function vote(address _volunteer) external nonReentrant {
+        require(electionActive, "No active election");
+        require(block.timestamp < electionEndTime, "Election has ended");
+        require(!hasVoted[msg.sender], "Already voted");
         
-        Election storage election = elections[electionId];
+        // Verify volunteer exists and is approved
+        VolunteerRegistry.Volunteer memory volunteer = volunteerRegistry.getVolunteerByAddress(_volunteer);
+        require(volunteer.isActive && volunteer.isApproved, "Invalid or unapproved volunteer");
         
-        for (uint256 i = 0; i < volunteerIndices.length; i++) {
-            uint256 volunteerIdx = volunteerIndices[i];
-            require(volunteerIdx < volunteerRegistry.getVolunteerCount(), "Invalid volunteer index");
-            
-            // Add volunteer to election
-            election.volunteerIds.push(volunteerIdx);
-        }
-        
-        emit VolunteersAdded(electionId, volunteerIndices);
-    }
-    
-    /**
-     * @dev Cast vote in an election
-     * @param electionId ID of the election
-     * @param volunteerIdx Index of the volunteer in election's volunteer list
-     */
-    function vote(uint256 electionId, uint256 volunteerIdx) external nonReentrant {
-        require(getElectionState(electionId) == ElectionState.Active, "Election not active");
-        
-        // Check if voter is a volunteer - volunteers cannot vote
-        require(!volunteerRegistry.isVolunteer(msg.sender), "Volunteers cannot vote");
-        
-        Election storage election = elections[electionId];
-        require(volunteerIdx < election.volunteerIds.length, "Invalid volunteer index");
-        require(!election.hasVoted[msg.sender], "Already voted in this election");
-        
-        // Get voting power based on governance token balance
-        uint256 votes = governanceToken.balanceOf(msg.sender);
-        require(votes > 0, "No voting power");
+        // Calculate voting power
+        uint256 votingPower = governanceToken.balanceOf(msg.sender);
+        require(votingPower > 0, "No voting power");
         
         // Record vote
-        uint256 volunteerId = election.volunteerIds[volunteerIdx];
-        election.hasVoted[msg.sender] = true;
-        election.volunteerVotes[volunteerId] += votes;
+        votesReceived[_volunteer] += votingPower;
+        voterChoices[msg.sender] = _volunteer;
+        hasVoted[msg.sender] = true;
+        totalVotesCast += votingPower;
         
-        emit VoteCast(msg.sender, electionId, volunteerId, votes);
+        // Mark voter in volunteer registry
+        volunteerRegistry.markAsVoted(msg.sender);
+        
+        emit VoteCast(msg.sender, _volunteer, votingPower);
     }
     
     /**
-     * @dev Complete an election and determine the winner
-     * @param electionId ID of the election
+     * @dev Conclude the election
      */
-    function completeElection(uint256 electionId) external onlyRole(ADMIN_ROLE) {
-        Election storage election = elections[electionId];
-        require(!election.completed, "Election already completed");
-        require(block.timestamp >= election.endTime, "Voting period not ended");
+    function concludeElection() external {
+        require(electionActive, "No active election");
+        require(block.timestamp >= electionEndTime || 
+                totalVotesCast >= (governanceToken.totalSupply() * minimumQuorum) / 100,
+                "Election not yet eligible for conclusion");
+        require(!electionConcluded, "Election already concluded");
         
-        election.completed = true;
+        electionActive = false;
+        electionConcluded = true;
         
-        // Find volunteer with most votes
-        uint256 winningVotes = 0;
-        uint256 winningVolunteerId = 0;
-        bool hasWinner = false;
+        // Find the winner
+        address winningVolunteer = address(0);
+        uint256 winningVoteCount = 0;
         
-        for (uint256 i = 0; i < election.volunteerIds.length; i++) {
-            uint256 volunteerId = election.volunteerIds[i];
-            uint256 voteCount = election.volunteerVotes[volunteerId];
+        for (uint256 i = 1; i <= volunteerRegistry.getVolunteerCount(); i++) {
+            VolunteerRegistry.Volunteer memory volunteer = volunteerRegistry.getVolunteerById(i);
+            address volunteerAddress = volunteer.walletAddress;
             
-            if (voteCount > winningVotes) {
-                winningVotes = voteCount;
-                winningVolunteerId = volunteerId;
-                hasWinner = true;
+            if (volunteer.isActive && volunteer.isApproved && 
+                votesReceived[volunteerAddress] > winningVoteCount) {
+                winningVoteCount = votesReceived[volunteerAddress];
+                winningVolunteer = volunteerAddress;
             }
         }
         
-        if (hasWinner) {
-            election.winningVolunteerId = winningVolunteerId;
-            
-            (address winnerAddress, , , ) = volunteerRegistry.getVolunteerByIndex(winningVolunteerId);
-            
-            emit ElectionCompleted(electionId, winningVolunteerId, winnerAddress);
+        // If there's a winner with votes
+        if (winningVolunteer != address(0) && winningVoteCount > 0) {
+            electionWinner = winningVolunteer;
+            emit ElectionConcluded(winningVolunteer, winningVoteCount);
         } else {
-            emit ElectionCompleted(electionId, 0, address(0));
+            emit NoWinnerDeclared();
         }
     }
     
     /**
-     * @dev Distribute funds to the winning volunteer
-     * @param electionId ID of the election
-     * @param amount Amount to distribute
+     * @dev Distribute funds to the winner
      */
-    function distributeToWinner(uint256 electionId, uint256 amount) external onlyRole(ADMIN_ROLE) nonReentrant {
-        Election storage election = elections[electionId];
-        require(election.completed, "Election not completed");
+    function distributeFunds() external nonReentrant {
+        require(electionConcluded, "Election not concluded");
+        require(!fundsDistributed, "Funds already distributed");
+        require(electionWinner != address(0), "No winner to distribute to");
         
-        (address winnerAddress, , , ) = volunteerRegistry.getVolunteerByIndex(election.winningVolunteerId);
-        require(winnerAddress != address(0), "No winner found");
+        uint256 totalFunds = usdcToken.balanceOf(address(this));
+        require(totalFunds > 0, "No funds to distribute");
         
-        // Execute transfer through treasury
-        treasury.executeTransfer(winnerAddress, amount);
+        // Transfer all USDC to the winner
+        fundsDistributed = true;
+        require(usdcToken.transfer(electionWinner, totalFunds), "Token transfer failed");
+        
+        emit FundsDistributed(electionWinner, totalFunds);
     }
     
     /**
-     * @dev Get election state
-     * @param electionId ID of the election
+     * @dev Update election parameters
+     * @param _minimumQuorum New minimum quorum percentage
+     * @param _electionDuration New default election duration
      */
-    function getElectionState(uint256 electionId) public view returns (ElectionState) {
-        Election storage election = elections[electionId];
+    function updateElectionParameters(
+        uint256 _minimumQuorum,
+        uint256 _electionDuration
+    ) external onlyRole(ADMIN_ROLE) {
+        require(!electionActive, "Cannot change during active election");
+        require(_minimumQuorum <= 100, "Quorum cannot exceed 100%");
+        require(_electionDuration > 0, "Duration must be greater than 0");
         
-        if (election.completed || block.timestamp > election.endTime) {
-            return ElectionState.Completed;
-        } else {
-            return ElectionState.Active;
+        minimumQuorum = _minimumQuorum;
+        electionDuration = _electionDuration;
+    }
+    
+    /**
+     * @dev Check if election has reached quorum
+     * @return Whether the quorum has been reached
+     */
+    function hasReachedQuorum() public view returns (bool) {
+        return totalVotesCast >= (governanceToken.totalSupply() * minimumQuorum) / 100;
+    }
+    
+    /**
+     * @dev Check if election has ended
+     * @return Whether the election period has ended
+     */
+    function isElectionEnded() public view returns (bool) {
+        return block.timestamp >= electionEndTime;
+    }
+    
+    /**
+     * @dev Get the tally of votes for a volunteer
+     * @param _volunteer Address of the volunteer
+     * @return Number of votes received
+     */
+    function getVotesFor(address _volunteer) external view returns (uint256) {
+        return votesReceived[_volunteer];
+    }
+    
+    /**
+     * @dev Get the choice of a voter
+     * @param _voter Address of the voter
+     * @return Address of the chosen volunteer, or zero address if not voted
+     */
+    function getVoterChoice(address _voter) external view returns (address) {
+        return voterChoices[_voter];
+    }
+    
+    /**
+     * @dev Get time remaining in the election
+     * @return Seconds remaining, or 0 if ended
+     */
+    function getTimeRemaining() external view returns (uint256) {
+        if (!electionActive || block.timestamp >= electionEndTime) {
+            return 0;
         }
-    }
-    
-    /**
-     * @dev Get election details
-     * @param electionId ID of the election
-     */
-    function getElectionDetails(uint256 electionId) external view returns (
-        string memory title,
-        string memory description,
-        uint256 startTime,
-        uint256 endTime,
-        bool completed,
-        uint256 volunteerCount,
-        ElectionState state
-    ) {
-        Election storage election = elections[electionId];
-        return (
-            election.title,
-            election.description,
-            election.startTime,
-            election.endTime,
-            election.completed,
-            election.volunteerIds.length,
-            getElectionState(electionId)
-        );
-    }
-    
-    /**
-     * @dev Get volunteer vote count
-     * @param electionId ID of the election
-     * @param volunteerIdx Index of the volunteer in the election
-     */
-    function getVolunteerVotes(uint256 electionId, uint256 volunteerIdx) external view returns (uint256) {
-        Election storage election = elections[electionId];
-        require(volunteerIdx < election.volunteerIds.length, "Invalid volunteer index");
-        
-        uint256 volunteerId = election.volunteerIds[volunteerIdx];
-        return election.volunteerVotes[volunteerId];
-    }
-    
-    /**
-     * @dev Check if an address has voted in an election
-     * @param electionId ID of the election
-     * @param voter Address of the voter
-     */
-    function hasVoted(uint256 electionId, address voter) external view returns (bool) {
-        return elections[electionId].hasVoted[voter];
+        return electionEndTime - block.timestamp;
     }
 } 

@@ -16,11 +16,12 @@ const config: HardhatUserConfig = {
       optimizer: {
         enabled: true,
         runs: 200
-      }
+      },
+      viaIR: true
     }
   },
   paths: {
-    sources: "./contracts-new",
+    sources: "./contracts",
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts"

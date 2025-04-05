@@ -2,179 +2,186 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./VolunteerRegistry.sol";
 import "./FlashDAOToken.sol";
 import "./FlashDAOTreasury.sol";
 import "./FlashDAOGovernance.sol";
+import "./VolunteerRegistry.sol";
 
 /**
  * @title MultiChainDAOFactory
- * @dev Factory contract for deploying the entire DAO system
+ * @dev Factory contract to deploy new FlashDAO instances across multiple chains
  */
 contract MultiChainDAOFactory is AccessControl {
-    bytes32 public constant DEPLOYER_ROLE = keccak256("DEPLOYER_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     
-    struct DAODeployment {
-        address volunteerRegistry;
-        address governanceToken;
-        address treasury;
-        address governance;
+    struct DAOInfo {
+        string name;
+        address tokenAddress;
+        address treasuryAddress;
+        address governanceAddress;
+        address volunteerRegistryAddress;
+        uint256 creationTime;
         uint256 chainId;
-        uint256 deploymentTime;
+        bool active;
     }
     
-    // DAO ID => ChainID => Deployment
-    mapping(bytes32 => mapping(uint256 => DAODeployment)) public deployments;
+    // DAO ID to DAOInfo mapping
+    mapping(bytes32 => DAOInfo) public daos;
     
-    // DAO ID list
+    // Array of DAO IDs for enumeration
     bytes32[] public daoIds;
     
     // Events
-    event DAODeployed(
+    event DAOCreated(
         bytes32 indexed daoId,
-        uint256 indexed chainId,
-        address volunteerRegistry,
-        address governanceToken,
-        address treasury,
-        address governance
+        string name,
+        address tokenAddress,
+        address treasuryAddress,
+        address governanceAddress,
+        address volunteerRegistryAddress,
+        uint256 chainId
     );
+    event DAODeactivated(bytes32 indexed daoId);
     
+    /**
+     * @dev Constructor
+     */
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(DEPLOYER_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
     
     /**
-     * @dev Deploy a complete DAO system
-     * @param daoId Unique identifier for the DAO (same across chains)
-     * @param usdcAddress Address of the USDC token on this chain
-     * @param selfProtocolAddress Address of Self Protocol verifier (can be address(0))
+     * @dev Create a new FlashDAO instance
+     * @param _name Name of the DAO
+     * @param _usdcAddress Address of the USDC token on the current chain
+     * @param _selfProtocolAddress Address of the Self Protocol on the current chain
+     * @return daoId Unique identifier for the created DAO
      */
-    function deployDAO(
-        bytes32 daoId,
-        address usdcAddress,
-        address selfProtocolAddress
-    ) external onlyRole(DEPLOYER_ROLE) returns (
-        address volunteerRegistry,
-        address governanceToken,
-        address treasury,
-        address governance
-    ) {
-        require(usdcAddress != address(0), "Invalid USDC address");
-        require(deployments[daoId][block.chainid].deploymentTime == 0, "DAO already deployed on this chain");
+    function createNewDAO(
+        string memory _name,
+        address _usdcAddress,
+        address _selfProtocolAddress
+    ) external onlyRole(ADMIN_ROLE) returns (bytes32 daoId) {
+        // Deploy token contract
+        FlashDAOToken token = new FlashDAOToken();
         
-        // Step 1: Deploy VolunteerRegistry
-        VolunteerRegistry _volunteerRegistry = new VolunteerRegistry(selfProtocolAddress);
-        volunteerRegistry = address(_volunteerRegistry);
+        // Deploy volunteer registry
+        VolunteerRegistry volunteerRegistry = new VolunteerRegistry(_selfProtocolAddress);
         
-        // Step 2: Deploy governance token
-        FlashDAOToken _governanceToken = new FlashDAOToken();
-        governanceToken = address(_governanceToken);
-        
-        // Step 3: Deploy treasury
-        FlashDAOTreasury _treasury = new FlashDAOTreasury(
-            usdcAddress,
-            governanceToken,
-            volunteerRegistry
+        // Deploy treasury with all three required parameters
+        FlashDAOTreasury treasury = new FlashDAOTreasury(
+            _usdcAddress,           // USDC 地址
+            address(token),         // 治理代幣地址
+            address(volunteerRegistry)  // 志願者註冊表地址
         );
-        treasury = address(_treasury);
         
-        // Step 4: Deploy governance
-        FlashDAOGovernance _governance = new FlashDAOGovernance(
-            governanceToken,
-            treasury,
-            volunteerRegistry
+        // Deploy governance
+        FlashDAOGovernance governance = new FlashDAOGovernance(
+            address(token),
+            _usdcAddress,
+            address(volunteerRegistry),
+            _selfProtocolAddress,
+            msg.sender
         );
-        governance = address(_governance);
         
-        // Step 5: Set up permissions
-        _governanceToken.grantRole(keccak256("MINTER_ROLE"), treasury);
-        _volunteerRegistry.grantRole(keccak256("ADMIN_ROLE"), msg.sender);
-        _treasury.grantRole(keccak256("ADMIN_ROLE"), msg.sender);
-        _governance.grantRole(keccak256("ADMIN_ROLE"), msg.sender);
+        // Grant MINTER_ROLE to treasury
+        token.grantRole(keccak256("MINTER_ROLE"), address(treasury));
         
-        // Record deployment
-        deployments[daoId][block.chainid] = DAODeployment({
-            volunteerRegistry: volunteerRegistry,
-            governanceToken: governanceToken,
-            treasury: treasury,
-            governance: governance,
+        // Generate unique DAO ID
+        daoId = keccak256(abi.encodePacked(_name, block.timestamp, block.chainid));
+        
+        // Store DAO information
+        daos[daoId] = DAOInfo({
+            name: _name,
+            tokenAddress: address(token),
+            treasuryAddress: address(treasury),
+            governanceAddress: address(governance),
+            volunteerRegistryAddress: address(volunteerRegistry),
+            creationTime: block.timestamp,
             chainId: block.chainid,
-            deploymentTime: block.timestamp
+            active: true
         });
         
-        // Add to list if first deployment
-        if (deployments[daoId][block.chainid].deploymentTime == 0) {
-            daoIds.push(daoId);
-        }
+        // Add to ID array for enumeration
+        daoIds.push(daoId);
         
-        emit DAODeployed(
+        emit DAOCreated(
             daoId,
-            block.chainid,
-            volunteerRegistry,
-            governanceToken,
-            treasury,
-            governance
+            _name,
+            address(token),
+            address(treasury),
+            address(governance),
+            address(volunteerRegistry),
+            block.chainid
         );
         
-        return (volunteerRegistry, governanceToken, treasury, governance);
+        return daoId;
     }
     
     /**
-     * @dev Get deployment details for a DAO on a specific chain
+     * @dev Deactivate a DAO
+     * @param daoId ID of the DAO to deactivate
+     */
+    function deactivateDAO(bytes32 daoId) external onlyRole(ADMIN_ROLE) {
+        require(daos[daoId].active, "DAO already inactive or doesn't exist");
+        
+        daos[daoId].active = false;
+        
+        emit DAODeactivated(daoId);
+    }
+    
+    /**
+     * @dev Get DAO information
      * @param daoId ID of the DAO
-     * @param chainId Chain ID
+     * @return DAOInfo struct containing DAO details
      */
-    function getDeployment(bytes32 daoId, uint256 chainId) external view returns (
-        address volunteerRegistry,
-        address governanceToken,
-        address treasury,
-        address governance,
-        uint256 deploymentTime
-    ) {
-        DAODeployment storage deployment = deployments[daoId][chainId];
-        return (
-            deployment.volunteerRegistry,
-            deployment.governanceToken,
-            deployment.treasury,
-            deployment.governance,
-            deployment.deploymentTime
-        );
+    function getDAOInfo(bytes32 daoId) external view returns (DAOInfo memory) {
+        return daos[daoId];
     }
     
     /**
-     * @dev Get deployment details for a DAO on current chain
-     * @param daoId ID of the DAO
+     * @dev Get the total number of DAOs
+     * @return Number of DAOs created
      */
-    function getDeploymentOnCurrentChain(bytes32 daoId) external view returns (
-        address volunteerRegistry,
-        address governanceToken,
-        address treasury,
-        address governance,
-        uint256 deploymentTime
-    ) {
-        DAODeployment storage deployment = deployments[daoId][block.chainid];
-        return (
-            deployment.volunteerRegistry,
-            deployment.governanceToken,
-            deployment.treasury,
-            deployment.governance,
-            deployment.deploymentTime
-        );
-    }
-    
-    /**
-     * @dev Get count of unique DAOs
-     */
-    function getDaoCount() external view returns (uint256) {
+    function getDAOCount() external view returns (uint256) {
         return daoIds.length;
     }
     
     /**
-     * @dev Get DAO ID by index
-     * @param index Index in the DAO list
+     * @dev Get all active DAOs
+     * @return Array of active DAO IDs
      */
-    function getDaoIdByIndex(uint256 index) external view returns (bytes32) {
+    function getActiveDAOs() external view returns (bytes32[] memory) {
+        uint256 activeCount = 0;
+        
+        // Count active DAOs
+        for (uint256 i = 0; i < daoIds.length; i++) {
+            if (daos[daoIds[i]].active) {
+                activeCount++;
+            }
+        }
+        
+        // Create array of active DAO IDs
+        bytes32[] memory activeDAOs = new bytes32[](activeCount);
+        uint256 currentIndex = 0;
+        
+        for (uint256 i = 0; i < daoIds.length; i++) {
+            if (daos[daoIds[i]].active) {
+                activeDAOs[currentIndex] = daoIds[i];
+                currentIndex++;
+            }
+        }
+        
+        return activeDAOs;
+    }
+    
+    /**
+     * @dev Get DAO ID by index
+     * @param index Index in the daoIds array
+     * @return DAO ID at the specified index
+     */
+    function getDAOIdByIndex(uint256 index) external view returns (bytes32) {
         require(index < daoIds.length, "Index out of bounds");
         return daoIds[index];
     }

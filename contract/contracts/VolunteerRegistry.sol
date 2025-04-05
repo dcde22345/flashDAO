@@ -2,184 +2,246 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
-/**
- * @title ISelfProtocol
- * @dev Interface for Self Protocol verification
- */
-interface ISelfProtocol {
-    function verifyCredential(
-        address user,
-        bytes calldata credential,
-        bytes calldata signature
-    ) external view returns (bool);
-    
-    function getVerifier() external view returns (address);
-}
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "./interfaces/ISelfProtocol.sol";
 
 /**
  * @title VolunteerRegistry
- * @dev Registry for volunteers with Self Protocol integration
+ * @dev Contract for registering and managing volunteers for FlashDAO events
  */
 contract VolunteerRegistry is AccessControl {
-    using ECDSA for bytes32;
+    using Counters for Counters.Counter;
     
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant EVENT_MANAGER_ROLE = keccak256("EVENT_MANAGER_ROLE");
     
-    // Self Protocol interface - can be set to actual protocol address later
     ISelfProtocol public selfProtocol;
-    bool public selfProtocolEnabled = false;
+    Counters.Counter private _volunteerId;
     
-    struct VolunteerInfo {
-        bool isRegistered;
+    struct Volunteer {
+        uint256 id;
+        address walletAddress;
         string name;
-        string profileData; // IPFS hash to more detailed information
-        uint256 registrationTime;
-        bytes credential; // Stores Self Protocol credential hash
+        string description;
+        uint256 registrationDate;
+        bool isActive;
+        bool isApproved;
     }
     
-    mapping(address => VolunteerInfo) public volunteers;
-    address[] public volunteerAddresses;
+    // Volunteer storage
+    mapping(address => Volunteer) public volunteerByAddress;
+    mapping(uint256 => address) public volunteerAddressById;
+    mapping(uint256 => bool) public volunteerExists;
     
-    event VolunteerRegistered(address indexed volunteer, string name);
-    event SelfProtocolUpdated(address indexed protocolAddress);
-    event SelfProtocolStatusChanged(bool enabled);
+    // Voting restriction tracking
+    mapping(address => bool) public hasVoted;
+    
+    // Events
+    event VolunteerRegistered(uint256 indexed volunteerId, address indexed volunteerAddress, string name);
+    event VolunteerApproved(uint256 indexed volunteerId, address indexed volunteerAddress);
+    event VolunteerDeactivated(uint256 indexed volunteerId, address indexed volunteerAddress);
+    event SelfProtocolAddressUpdated(address indexed newAddress);
     
     /**
-     * @dev Constructor
-     * @param _selfProtocol Address of Self Protocol contract (can be address(0) initially)
+     * @dev Constructor to initialize the contract
+     * @param _selfProtocolAddress Address of the Self Protocol for credential verification
      */
-    constructor(address _selfProtocol) {
-        if (_selfProtocol != address(0)) {
-            selfProtocol = ISelfProtocol(_selfProtocol);
-            selfProtocolEnabled = true;
-        }
+    constructor(address _selfProtocolAddress) {
+        require(_selfProtocolAddress != address(0), "Invalid Self Protocol address");
+        
+        selfProtocol = ISelfProtocol(_selfProtocolAddress);
         
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(EVENT_MANAGER_ROLE, msg.sender);
     }
     
     /**
-     * @dev Set Self Protocol contract address
-     * @param _protocolAddress The address of Self Protocol contract
+     * @dev Allow users to register themselves as volunteers
+     * @param _name Name of the volunteer
+     * @param _description Description of the volunteer
+     * @param _credentials Self Protocol credentials for verification
      */
-    function setSelfProtocol(address _protocolAddress) external onlyRole(ADMIN_ROLE) {
-        require(_protocolAddress != address(0), "Invalid protocol address");
-        selfProtocol = ISelfProtocol(_protocolAddress);
-        emit SelfProtocolUpdated(_protocolAddress);
-    }
-    
-    /**
-     * @dev Enable or disable Self Protocol verification
-     * @param _enabled Whether Self Protocol verification is enabled
-     */
-    function setSelfProtocolEnabled(bool _enabled) external onlyRole(ADMIN_ROLE) {
-        selfProtocolEnabled = _enabled;
-        emit SelfProtocolStatusChanged(_enabled);
-    }
-    
-    /**
-     * @dev Register as volunteer with Self Protocol verification
-     * @param name Volunteer name
-     * @param profileData Additional volunteer profile data
-     * @param credential Self Protocol credential
-     * @param signature Self Protocol signature
-     */
-    function registerWithSelfProtocol(
-        string calldata name,
-        string calldata profileData,
-        bytes calldata credential,
-        bytes calldata signature
+    function registerAsVolunteer(
+        string calldata _name,
+        string calldata _description,
+        bytes calldata _credentials
     ) external {
-        require(selfProtocolEnabled, "Self Protocol verification not enabled");
-        require(!volunteers[msg.sender].isRegistered, "Already registered as volunteer");
-        require(bytes(name).length > 0, "Name cannot be empty");
+        require(!isVolunteer(msg.sender), "Already registered as volunteer");
+        require(!hasVoted[msg.sender], "Voters cannot be volunteers");
+        require(bytes(_name).length > 0, "Name cannot be empty");
         
-        // Verify through Self Protocol
-        require(
-            selfProtocol.verifyCredential(msg.sender, credential, signature),
-            "Identity verification failed"
-        );
+        // Verify credentials with Self Protocol
+        require(selfProtocol.verifyCredentials(msg.sender, _credentials), "Invalid credentials");
         
-        _registerVolunteer(msg.sender, name, profileData, credential);
-    }
-    
-    /**
-     * @dev Register volunteer by admin (fallback method)
-     * @param volunteerAddress Address of the volunteer
-     * @param name Volunteer name
-     * @param profileData Additional volunteer info
-     */
-    function adminRegisterVolunteer(
-        address volunteerAddress, 
-        string calldata name, 
-        string calldata profileData
-    ) external onlyRole(ADMIN_ROLE) {
-        require(!volunteers[volunteerAddress].isRegistered, "Volunteer already registered");
-        require(bytes(name).length > 0, "Name cannot be empty");
+        // Create new volunteer
+        _volunteerId.increment();
+        uint256 newVolunteerId = _volunteerId.current();
         
-        _registerVolunteer(volunteerAddress, name, profileData, "");
-    }
-    
-    /**
-     * @dev Internal function to register a volunteer
-     */
-    function _registerVolunteer(
-        address volunteerAddress,
-        string memory name,
-        string memory profileData,
-        bytes memory credential
-    ) internal {
-        volunteers[volunteerAddress] = VolunteerInfo({
-            isRegistered: true,
-            name: name,
-            profileData: profileData,
-            registrationTime: block.timestamp,
-            credential: credential
+        Volunteer memory newVolunteer = Volunteer({
+            id: newVolunteerId,
+            walletAddress: msg.sender,
+            name: _name,
+            description: _description,
+            registrationDate: block.timestamp,
+            isActive: true,
+            isApproved: false
         });
         
-        volunteerAddresses.push(volunteerAddress);
+        volunteerByAddress[msg.sender] = newVolunteer;
+        volunteerAddressById[newVolunteerId] = msg.sender;
+        volunteerExists[newVolunteerId] = true;
         
-        emit VolunteerRegistered(volunteerAddress, name);
+        emit VolunteerRegistered(newVolunteerId, msg.sender, _name);
+    }
+    
+    /**
+     * @dev Allow admins to register volunteers
+     * @param _volunteerAddress Address of the volunteer
+     * @param _name Name of the volunteer
+     * @param _description Description of the volunteer
+     * @param _credentials Self Protocol credentials for verification
+     */
+    function registerVolunteer(
+        address _volunteerAddress,
+        string calldata _name,
+        string calldata _description,
+        bytes calldata _credentials
+    ) external onlyRole(ADMIN_ROLE) {
+        require(_volunteerAddress != address(0), "Invalid volunteer address");
+        require(!isVolunteer(_volunteerAddress), "Already registered as volunteer");
+        require(!hasVoted[_volunteerAddress], "Voters cannot be volunteers");
+        require(bytes(_name).length > 0, "Name cannot be empty");
+        
+        // Verify credentials with Self Protocol
+        require(selfProtocol.verifyCredentials(_volunteerAddress, _credentials), "Invalid credentials");
+        
+        // Create new volunteer
+        _volunteerId.increment();
+        uint256 newVolunteerId = _volunteerId.current();
+        
+        Volunteer memory newVolunteer = Volunteer({
+            id: newVolunteerId,
+            walletAddress: _volunteerAddress,
+            name: _name,
+            description: _description,
+            registrationDate: block.timestamp,
+            isActive: true,
+            isApproved: true  // Auto-approved when registered by admin
+        });
+        
+        volunteerByAddress[_volunteerAddress] = newVolunteer;
+        volunteerAddressById[newVolunteerId] = _volunteerAddress;
+        volunteerExists[newVolunteerId] = true;
+        
+        emit VolunteerRegistered(newVolunteerId, _volunteerAddress, _name);
+        emit VolunteerApproved(newVolunteerId, _volunteerAddress);
+    }
+    
+    /**
+     * @dev Approve a volunteer
+     * @param volunteerId ID of the volunteer to approve
+     */
+    function approveVolunteer(uint256 volunteerId) external onlyRole(EVENT_MANAGER_ROLE) {
+        require(volunteerExists[volunteerId], "Volunteer does not exist");
+        
+        address volunteerAddress = volunteerAddressById[volunteerId];
+        Volunteer storage volunteer = volunteerByAddress[volunteerAddress];
+        
+        require(!volunteer.isApproved, "Volunteer already approved");
+        require(volunteer.isActive, "Volunteer is not active");
+        
+        volunteer.isApproved = true;
+        
+        emit VolunteerApproved(volunteerId, volunteerAddress);
+    }
+    
+    /**
+     * @dev Deactivate a volunteer
+     * @param volunteerId ID of the volunteer to deactivate
+     */
+    function deactivateVolunteer(uint256 volunteerId) external onlyRole(ADMIN_ROLE) {
+        require(volunteerExists[volunteerId], "Volunteer does not exist");
+        
+        address volunteerAddress = volunteerAddressById[volunteerId];
+        Volunteer storage volunteer = volunteerByAddress[volunteerAddress];
+        
+        require(volunteer.isActive, "Volunteer already inactive");
+        
+        volunteer.isActive = false;
+        
+        emit VolunteerDeactivated(volunteerId, volunteerAddress);
+    }
+    
+    /**
+     * @dev Mark a user as having voted (can only be called by an event contract with EVENT_MANAGER_ROLE)
+     * @param _voter Address of the user who voted
+     */
+    function markAsVoted(address _voter) external onlyRole(EVENT_MANAGER_ROLE) {
+        hasVoted[_voter] = true;
+    }
+    
+    /**
+     * @dev Update the Self Protocol address
+     * @param _newSelfProtocolAddress New address for Self Protocol
+     */
+    function updateSelfProtocolAddress(address _newSelfProtocolAddress) external onlyRole(ADMIN_ROLE) {
+        require(_newSelfProtocolAddress != address(0), "Invalid Self Protocol address");
+        
+        selfProtocol = ISelfProtocol(_newSelfProtocolAddress);
+        
+        emit SelfProtocolAddressUpdated(_newSelfProtocolAddress);
     }
     
     /**
      * @dev Check if an address is a registered volunteer
-     * @param account Address to check
-     * @return Whether the address is a registered volunteer
+     * @param _address Address to check
+     * @return True if the address is a registered volunteer
      */
-    function isVolunteer(address account) external view returns (bool) {
-        return volunteers[account].isRegistered;
+    function isVolunteer(address _address) public view returns (bool) {
+        return volunteerByAddress[_address].walletAddress == _address;
+    }
+    
+    /**
+     * @dev Check if a volunteer is approved
+     * @param volunteerId ID of the volunteer to check
+     * @return True if the volunteer is approved
+     */
+    function isApproved(uint256 volunteerId) external view returns (bool) {
+        require(volunteerExists[volunteerId], "Volunteer does not exist");
+        
+        address volunteerAddress = volunteerAddressById[volunteerId];
+        return volunteerByAddress[volunteerAddress].isApproved;
+    }
+    
+    /**
+     * @dev Get volunteer information by ID
+     * @param volunteerId ID of the volunteer
+     * @return Volunteer information (id, address, name, description, registration date, active status, approval status)
+     */
+    function getVolunteerById(uint256 volunteerId) external view returns (Volunteer memory) {
+        require(volunteerExists[volunteerId], "Volunteer does not exist");
+        
+        address volunteerAddress = volunteerAddressById[volunteerId];
+        return volunteerByAddress[volunteerAddress];
+    }
+    
+    /**
+     * @dev Get volunteer information by address
+     * @param _volunteerAddress Address of the volunteer
+     * @return Volunteer information (id, address, name, description, registration date, active status, approval status)
+     */
+    function getVolunteerByAddress(address _volunteerAddress) external view returns (Volunteer memory) {
+        require(isVolunteer(_volunteerAddress), "Not a volunteer");
+        
+        return volunteerByAddress[_volunteerAddress];
     }
     
     /**
      * @dev Get the total number of registered volunteers
-     * @return Number of volunteers
+     * @return Total number of volunteers
      */
     function getVolunteerCount() external view returns (uint256) {
-        return volunteerAddresses.length;
-    }
-    
-    /**
-     * @dev Get volunteer info by index
-     * @param index Index in the volunteer list
-     */
-    function getVolunteerByIndex(uint256 index) external view returns (
-        address volunteerAddress,
-        string memory name,
-        string memory profileData,
-        uint256 registrationTime
-    ) {
-        require(index < volunteerAddresses.length, "Index out of bounds");
-        address addr = volunteerAddresses[index];
-        VolunteerInfo storage info = volunteers[addr];
-        
-        return (
-            addr,
-            info.name,
-            info.profileData,
-            info.registrationTime
-        );
+        return _volunteerId.current();
     }
 } 

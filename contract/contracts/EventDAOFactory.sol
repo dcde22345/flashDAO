@@ -73,8 +73,8 @@ contract EventDAOFactory is AccessControl {
     ) external onlyRole(CREATOR_ROLE) returns (bytes32) {
         require(bytes(eventName).length > 0, "Event name cannot be empty");
         
-        // Generate a unique event ID based on name and timestamp
-        bytes32 eventId = keccak256(abi.encodePacked(eventName, block.timestamp, msg.sender));
+        // Generate a unique event ID with consistent parameters across chains
+        bytes32 eventId = generateEventIdWithParams(eventName, eventDescription, block.timestamp, msg.sender);
         
         // Make sure this event ID doesn't already exist
         require(!eventDAOs[eventId].exists, "Event ID already exists");
@@ -110,6 +110,23 @@ contract EventDAOFactory is AccessControl {
         emit EventDAOCreated(eventId, eventName, address(newDAO), expiresAt);
         
         return eventId;
+    }
+    
+    /**
+     * @dev Generate a unique event ID that is consistent across chains
+     * @param eventName Name of the event
+     * @param eventDescription Description of the event
+     * @param creationTimestamp Timestamp when the event was created
+     * @param creator Address of the creator
+     * @return eventId Unique identifier
+     */
+    function generateEventIdWithParams(
+        string memory eventName,
+        string memory eventDescription,
+        uint256 creationTimestamp,
+        address creator
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(eventName, eventDescription, creationTimestamp, creator));
     }
     
     /**

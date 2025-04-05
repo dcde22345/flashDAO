@@ -41,42 +41,16 @@ const config: HardhatUserConfig = {
       url: process.env.AVALANCHE_FUJI_RPC || 'https://api.avax-test.network/ext/bc/C/rpc',
       accounts: [PRIVATE_KEY],
       chainId: 43113
-    },
-    flow: {
-      url: 'https://mainnet.evm.nodes.onflow.org',
-      accounts: [PRIVATE_KEY],
-    },
-    flowTestnet: {
-      url: 'https://testnet.evm.nodes.onflow.org',
-      accounts: [PRIVATE_KEY],
     }
   },
   // @ts-ignore - Ignore etherscan type error
   etherscan: {
     apiKey: {
-      flow: 'abc',
-      flowTestnet: 'abc',
       baseSepolia: process.env.BASESCAN_API_KEY || 'abc',
       sepolia: process.env.ETHERSCAN_API_KEY || '',
       fuji: process.env.SNOWTRACE_API_KEY || ''
     },
     customChains: [
-      {
-        network: 'flow',
-        chainId: 747,
-        urls: {
-          apiURL: 'https://evm.flowscan.io/api',
-          browserURL: 'https://evm.flowscan.io/',
-        },
-      },
-      {
-        network: 'flowTestnet',
-        chainId: 545,
-        urls: {
-          apiURL: 'https://evm-testnet.flowscan.io/api',
-          browserURL: 'https://evm-testnet.flowscan.io/',
-        },
-      },
       {
         network: 'baseSepolia',
         chainId: 84532,

@@ -6,10 +6,8 @@ import "./EventDAO.sol";
 import "./VolunteerRegistry.sol";
 import "./FlashDAOToken.sol";
 
-/**
- * @title MultiChainDAOFactory
- * @dev Factory contract to deploy identical DAOs across multiple chains for cross-chain governance
- */
+// @title MultiChainDAOFactory
+// @dev Factory for deploying DAOs across multiple chains
 contract MultiChainDAOFactory is AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant DEPLOYER_ROLE = keccak256("DEPLOYER_ROLE");
@@ -18,95 +16,60 @@ contract MultiChainDAOFactory is AccessControl {
         address eventDAOAddress;
         address tokenAddress;
         address volunteerRegistryAddress;
-        uint256 deploymentTime;
+        uint256 deployedAt;
         bool active;
     }
     
     // Map: eventId => chainId => deployment details
     mapping(bytes32 => mapping(uint256 => ChainDeployment)) public deployments;
-    
-    // All unique event IDs deployed across any chain
+    mapping(bytes32 => bool) private eventExists;
     bytes32[] public allEventIds;
     
-    // Track which event IDs exist
-    mapping(bytes32 => bool) public eventExists;
-    
-    // Events
     event DAODeployed(
-        bytes32 indexed eventId, 
+        bytes32 indexed eventId,
         uint256 indexed chainId,
-        string eventName,
-        address eventDAOAddress, 
-        address tokenAddress, 
+        address eventDAOAddress,
+        address tokenAddress,
         address volunteerRegistryAddress
     );
     
     event DAODeactivated(bytes32 indexed eventId, uint256 indexed chainId);
     
-    /**
-     * @dev Constructor
-     */
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
         _grantRole(DEPLOYER_ROLE, msg.sender);
     }
     
-    /**
-     * @dev Deploy an identical DAO on the current chain
-     * @param eventId Unique identifier for the event (same across chains)
-     * @param eventName Name of the event
-     * @param eventDescription Description of the event
-     * @param usdcAddress Address of USDC on this chain
-     * @param selfProtocolAddress Address of Self Protocol on this chain
-     * @param duration Duration of the event in seconds
-     * @return eventDAOAddress Address of the deployed EventDAO
-     * @return tokenAddress Address of the deployed FlashDAOToken
-     * @return volunteerRegistryAddress Address of the deployed VolunteerRegistry
-     */
+    // @dev Deploy DAO on current chain with same eventId as on other chains
     function deployDAO(
         bytes32 eventId,
-        string memory eventName,
-        string memory eventDescription,
-        address usdcAddress,
-        address selfProtocolAddress,
-        uint256 duration
-    ) external onlyRole(DEPLOYER_ROLE) returns (
         address eventDAOAddress,
         address tokenAddress,
         address volunteerRegistryAddress
-    ) {
-        require(usdcAddress != address(0), "Invalid USDC address");
+    ) external onlyRole(DEPLOYER_ROLE) {
         require(!deployments[eventId][block.chainid].active, "DAO already deployed on this chain");
         
-        // Calculate expiration time
-        uint256 expiresAt = block.timestamp + duration;
-        
-        // Deploy FlashDAOToken
-        FlashDAOToken token = new FlashDAOToken();
-        tokenAddress = address(token);
-        
-        // Deploy VolunteerRegistry
-        VolunteerRegistry volunteerRegistry = new VolunteerRegistry(selfProtocolAddress);
-        volunteerRegistryAddress = address(volunteerRegistry);
-        
-        // Deploy EventDAO
-        EventDAO eventDAO = new EventDAO(
-            eventName,
-            eventDescription,
-            usdcAddress,
-            selfProtocolAddress,
-            expiresAt,
-            msg.sender
+        _recordDeployment(
+            eventId,
+            eventDAOAddress,
+            tokenAddress,
+            volunteerRegistryAddress
         );
-        eventDAOAddress = address(eventDAO);
-        
-        // Store deployment information
+    }
+    
+    // @dev Record deployment details
+    function _recordDeployment(
+        bytes32 eventId,
+        address eventDAOAddress,
+        address tokenAddress,
+        address volunteerRegistryAddress
+    ) internal {
         deployments[eventId][block.chainid] = ChainDeployment({
             eventDAOAddress: eventDAOAddress,
             tokenAddress: tokenAddress,
             volunteerRegistryAddress: volunteerRegistryAddress,
-            deploymentTime: block.timestamp,
+            deployedAt: block.timestamp,
             active: true
         });
         
@@ -119,32 +82,31 @@ contract MultiChainDAOFactory is AccessControl {
         emit DAODeployed(
             eventId,
             block.chainid,
-            eventName,
             eventDAOAddress,
             tokenAddress,
             volunteerRegistryAddress
         );
-        
-        return (eventDAOAddress, tokenAddress, volunteerRegistryAddress);
     }
     
-    /**
-     * @dev Generate a unique event ID based on name, description and timestamp
-     * @param eventName Name of the event
-     * @param eventDescription Description of the event
-     * @return eventId Unique identifier
-     */
+    // @dev Generate unique event ID that is consistent across chains
+    function generateEventIdWithParams(
+        string memory eventName,
+        string memory eventDescription,
+        uint256 creationTimestamp,
+        address creator
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(eventName, eventDescription, creationTimestamp, creator));
+    }
+    
+    // @dev Compatibility method for old code
     function generateEventId(
         string memory eventName,
         string memory eventDescription
     ) external view returns (bytes32) {
-        return keccak256(abi.encodePacked(eventName, eventDescription, block.timestamp, msg.sender));
+        return generateEventIdWithParams(eventName, eventDescription, block.timestamp, msg.sender);
     }
     
-    /**
-     * @dev Deactivate a DAO on this chain
-     * @param eventId ID of the event
-     */
+    // @dev Deactivate DAO on this chain
     function deactivateDAO(bytes32 eventId) external onlyRole(ADMIN_ROLE) {
         require(deployments[eventId][block.chainid].active, "DAO not active or doesn't exist");
         
@@ -153,45 +115,27 @@ contract MultiChainDAOFactory is AccessControl {
         emit DAODeactivated(eventId, block.chainid);
     }
     
-    /**
-     * @dev Get deployment details for an event on a specific chain
-     * @param eventId ID of the event
-     * @param chainId Chain ID
-     * @return Deployment details
-     */
+    // @dev Get deployment details for an event on a specific chain
     function getDeployment(bytes32 eventId, uint256 chainId) external view returns (ChainDeployment memory) {
         return deployments[eventId][chainId];
     }
     
-    /**
-     * @dev Get deployment details for an event on current chain
-     * @param eventId ID of the event
-     * @return Deployment details
-     */
+    // @dev Get deployment details for an event on current chain
     function getCurrentChainDeployment(bytes32 eventId) external view returns (ChainDeployment memory) {
         return deployments[eventId][block.chainid];
     }
     
-    /**
-     * @dev Get all event IDs
-     * @return Array of all event IDs
-     */
+    // @dev Get all event IDs
     function getAllEventIds() external view returns (bytes32[] memory) {
         return allEventIds;
     }
     
-    /**
-     * @dev Get count of unique events
-     * @return Number of unique events
-     */
+    // @dev Get count of unique events
     function getEventCount() external view returns (uint256) {
         return allEventIds.length;
     }
     
-    /**
-     * @dev Get all active deployments on current chain
-     * @return eventIds Array of active event IDs on this chain
-     */
+    // @dev Get all active deployments on current chain
     function getActiveDeploymentsOnCurrentChain() external view returns (bytes32[] memory) {
         uint256 activeCount = 0;
         

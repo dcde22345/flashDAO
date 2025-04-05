@@ -22,15 +22,25 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox-viem": "^2.0.0",
+    "@nomicfoundation/hardhat-viem": "^1.0.0",
     "@openzeppelin/hardhat-upgrades": "^3.0.2",
-    "@types/node": "^20.11.20",
-    "hardhat": "^2.22.1"
+    "@types/chai": "^4.2.0",
+    "@types/chai-as-promised": "^7.1.6",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.17.30",
+    "hardhat": "^2.22.1",
+    "hardhat-gas-reporter": "^1.0.8",
+    "solidity-coverage": "^0.8.1",
+    "ts-node": "^10.9.2",
+    "viem": "^1.15.1"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",
     "@nomicfoundation/hardhat-ignition": "^0.15.0",
-    "@openzeppelin/contracts": "^5.0.2",
+    "@openzeppelin/contracts": "4.9.3",
     "axios": "^1.6.7",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

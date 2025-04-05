@@ -14,11 +14,13 @@ contract/node_modules
 contract/package-lock.json
 contract/cache
 contract/agent_gen_contracts
+contract/artifacts
 
 # 環境變數和機密檔案
 .env
 .env.*
 !.env.example
+
 
 # 合約生成檔案
 contract/agent_gen_contracts/*
@@ -59,12 +61,3 @@ tmp/
 **/metamask_phares.txt
 **/pharse.txt
 **/wallet.json
-
-# 其他
-.yarn/*
-!.yarn/patches
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
-.pnp.*

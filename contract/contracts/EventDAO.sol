@@ -161,7 +161,7 @@ contract EventDAO is AccessControl, ReentrancyGuard {
             volunteerAddress: msg.sender,
             name: name,
             description: description,
-            approved: false
+            approved: true  // 自動批准，而非設置為false
         }));
         
         // Update tracking
@@ -169,6 +169,8 @@ contract EventDAO is AccessControl, ReentrancyGuard {
         volunteerIndex[msg.sender] = volunteers.length - 1;
         
         emit VolunteerRegistered(msg.sender, name);
+        // 直接發出批准事件，因為已自動批准
+        emit VolunteerApproved(msg.sender, volunteers.length - 1);
     }
     
     /**

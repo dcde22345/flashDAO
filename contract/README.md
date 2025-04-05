@@ -78,3 +78,111 @@ NETWORKS=baseSepolia,sepolia,fuji npx hardhat run scripts/deploy_multichain.js
 
 ## 许可证
 MIT License
+
+# FlashDAO 測試網部署指南
+
+本項目是一個基於多鏈架構的DAO系統，支持跨鏈部署、志願者註冊和投票機制。以下是在測試網上部署和測試的步驟。
+
+## 環境準備
+
+1. 安裝依賴
+```bash
+cd contract
+npm install
+```
+
+2. 設置環境變量
+將 `.env.example` 文件複製為 `.env` 並填入您的私鑰和API密鑰
+```bash
+cp .env.example .env
+```
+
+編輯 `.env` 文件，填寫以下信息：
+- `DEPLOY_WALLET_1`: 您的部署錢包私鑰
+- `ETHERSCAN_API_KEY`: Etherscan API密鑰（用於驗證合約）
+- `BASESCAN_API_KEY`: Basescan API密鑰
+- `SNOWTRACE_API_KEY`: Snowtrace API密鑰（Avalanche）
+
+## 部署步驟
+
+### 1. 單網絡部署 (例如 Base Sepolia)
+
+執行以下命令在 Base Sepolia 測試網上部署：
+```bash
+npx hardhat run scripts/deploy_event_dao.js --network baseSepolia
+```
+
+這將部署以下合約：
+- SelfProtocolMock（模擬身份驗證服務）
+- EventDAOFactory（DAO工廠合約）
+
+### 2. 多鏈部署 (在多個測試網上部署相同DAO)
+
+執行以下命令在多個網絡上部署相同的DAO：
+```bash
+NETWORKS=baseSepolia,sepolia,fuji npx hardhat run scripts/deploy_multichain.js
+```
+
+或者指定特定網絡：
+```bash
+npx hardhat run scripts/deploy_multichain.js --network baseSepolia
+```
+
+## 測試
+
+部署後可以運行測試以驗證功能：
+```bash
+npx hardhat test test/EventDAO.test.js
+```
+
+## 合約交互
+
+部署後，您可以使用以下方法與合約交互：
+
+### 創建DAO事件
+
+```javascript
+const factory = await ethers.getContractAt("EventDAOFactory", "部署地址");
+const tx = await factory.createEventDAO("事件名稱", "事件描述", 最小捐款金額, 最大志願者數量, 投票時間, 志願者註冊截止時間);
+```
+
+### 捐款並參與
+
+```javascript
+// 先授權USDC
+const usdc = await ethers.getContractAt("IERC20", USDC地址);
+await usdc.approve(DAO地址, 捐款金額);
+
+// 捐款
+const eventDAO = await ethers.getContractAt("EventDAO", DAO地址);
+await eventDAO.donate(捐款金額);
+```
+
+### 註冊為志願者
+
+```javascript
+const eventDAO = await ethers.getContractAt("EventDAO", DAO地址);
+await eventDAO.registerAsVolunteer();
+```
+
+### 投票
+
+```javascript
+const eventDAO = await ethers.getContractAt("EventDAO", DAO地址);
+await eventDAO.vote(志願者索引);
+```
+
+## 多鏈部署說明
+
+部署後，您可以在 `deployments` 目錄下找到部署信息，包括：
+- 各網絡的部署地址
+- 事件ID（用於跨鏈識別）
+- 部署時間
+
+您可以使用相同的事件ID在不同鏈上部署相同的DAO，實現跨鏈投票和管理。
+
+## 注意事項
+
+- 測試網USDC可能需要先部署模擬代幣
+- 請確保您的測試錢包中有足夠的測試代幣支付gas費
+- Base Sepolia測試網可能需要從水龍頭獲取測試ETH

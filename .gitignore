@@ -1,5 +1,5 @@
 # Node dependencies
-node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
 yarn-debug.log
@@ -11,6 +11,26 @@ package-lock.json
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+.vercel
+.swc/
+**/public/workbox-*.js
+**/public/sw.js
+**/public/service-worker.js
+
+# Frontend build artifacts
+.turbo
+.eslintcache
+storybook-static/
+.stylelintcache
+.cache/
+tsconfig.tsbuildinfo
+**/.vitepress/cache
+**/.vitepress/dist
 
 # Hardhat files
 cache
@@ -24,6 +44,7 @@ coverage.json
 
 # Deployments
 ignition/deployments/
+deployments/
 
 # IDEs and editors
 .idea
@@ -36,19 +57,18 @@ ignition/deployments/
 dist
 build
 out
+.output
 
 # Logs
 logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Hardhat temp files
 .openzeppelin
-deployments
-
-# Contract size limit
-.contract-size
-
-# Openzeppelin
 .openzeppelin/unknown-*.json
 
 # Tenderly
@@ -56,3 +76,22 @@ deployments
 
 # Debug files
 debug
+
+# Testing
+coverage.json
+coverage
+.nyc_output
+
+# Temporary files
+.temp
+.tmp
+
+# Misc
+.DS_Store
+*.pem
+.history/
+.env.me
+**/analyze/stats.json
+**/.yarn/*
+!**/.yarn/releases
+!**/.yarn/plugins

@@ -85,7 +85,7 @@ contract VolunteerRegistry is AccessControl {
             description: _description,
             registrationDate: block.timestamp,
             isActive: true,
-            isApproved: false
+            isApproved: true // 自動批准，不需要管理員額外批准
         });
         
         volunteerByAddress[msg.sender] = newVolunteer;
@@ -93,6 +93,8 @@ contract VolunteerRegistry is AccessControl {
         volunteerExists[newVolunteerId] = true;
         
         emit VolunteerRegistered(newVolunteerId, msg.sender, _name);
+        // 直接發出批准事件，因為已自動批准
+        emit VolunteerApproved(newVolunteerId, msg.sender);
     }
     
     /**

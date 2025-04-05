@@ -1,0 +1,110 @@
+All Docs
+/Stablecoins
+/Cross-Chain Transfer Protocol
+/CCTP APIs
+CCTP APIs
+CCTP provides a set of API hosts and endpoints to manage messages, attestations, and transaction details for your cross-chain USDC transfers.
+
+CCTP API Service Hosts
+Environment	URL
+Testnet	https://iris-api-sandbox.circle.com
+Mainnet	https://iris-api.circle.com
+CCTP API Endpoints
+Select the CCTP version below for a summary of API endpoints supported by each version:
+
+CCTP V1
+CCTP V2 endpoints enable advanced functionality such as fetching attestations for Standard Transfer or Fast Transfer burn events, verifying public keys across versions, accessing transaction details, querying fast transfer allowances and fees, and initiating re-attestation processes. Below is an overview of the CCTP V2 public endpoints. Click on any endpoint for its API reference.
+
+Endpoint	Description	Use Case
+GET /v2/publicKeys	Returns public keys for validating attestations across both supported versions of CCTP (V1 and V2).	Retrieve public keys to verify attestation authenticity for cross-chain transactions.
+GET /v2/messages/:sourceDomainId	Retrieves messages and attestations for a given transaction or nonce, supporting both V1 and V2 messages.	Fetch attestation status and transaction details.
+POST /v2/reattest/:nonce	Re-attests a soft finality V2 message to achieve finality or revive expired Fast Transfer burns.	Handle edge cases requiring updated attestations or finalize transactions with stricter rules.
+GET /v2/fastBurn/USDC/allowance	Retrieves the current USDC Fast Transfer allowance remaining.	Monitor available allowance for Fast Transfer burns in real-time.
+GET /v2/fastBurn/USDC/fees/:sourceDomainId/:destDomainId	Returns the fees for USDC Fast Transfers between specified source and destination domains.	Calculate transaction costs before initiating a Fast Transfer.
+
+All Docs
+/Stablecoins
+/Cross-Chain Transfer Protocol
+Cross-Chain Transfer Protocol
+Move USDC securely across blockchains and simplify user experience
+The future of cross-chain is here! Learn more about CCTP V2
+
+Overview
+Cross-Chain Transfer Protocol (CCTP) is a permissionless onchain utility that facilitates USDC transfers securely between blockchain networks via native burning and minting. Circle created CCTP to improve capital efficiency and minimize trust requirements when using USDC across blockchain networks. CCTP enables developers to build multichain applications that allow users to perform 1:1 transfers of USDC securely across blockchains.
+
+CCTP is accessible in two distinct versions, CCTP V1 and CCTP V2. Both versions enable secure USDC transfers across blockchains, but they differ in functionality and performance. CCTP V1 only supports Standard Transfer constrained by blockchain finality on the source blockchain (about 13 to 19 minutes for EVM chains). CCTP V2 introduces Fast Transfer and Hooks, in addition to also supporting Standard Transfer.
+
+Fast Transfer enables USDC transfers between blockchains at faster-than-finality speeds, significantly reducing transfer times from minutes to seconds. Hooks enhance cross-chain composability, allowing developers to trigger automated actions post-transfer process. For more information, refer to the Hooks section.
+
+CCTP V2 operates with a distinct set of smart contracts and APIs, and will form its own distinct network of supported blockchains as it is not backwards compatible with CCTP V1 smart contracts. However, developers can effectively stitch the two versions together under the hood to preserve a seamless UX and offer greater accessibility.
+
+Differences Between CCTP V1 and CCTP V2
+To better understand the evolution of CCTP, the following table highlights the key differences between CCTP V1 and CCTP V2:
+
+Feature	CCTP V1	CCTP V2
+Launch Date	April 26, 2023	March 11, 2025
+Transfer Speed	Standard Transfer:
+• standard-finality, ~13 to 19 minutes for EVM chains	Fast Transfer:
+• faster-than-finality, ~22 seconds for EVM chains
+Standard Transfer (still supported):
+• standard-finality, ~13 to 19 minutes for EVM chains
+Supported Blockchains	Aptos, Arbitrum, Avalanche, Base, Ethereum, Noble, OP Mainnet, Polygon PoS, Solana, Sui, and Unichain	Avalanche, Base, Ethereum, Linea, and coming soon to Arbitrum, Solana. More blockchains to be announced.
+Pricing	Free for Standard Transfer	• Free for Standard Transfer and Hooks
+• Onchain fee for Fast Transfer
+User Experience	Standard cross-chain functionalities	Advanced cross-chain functionalities with speed and composability
+Liquidity	Enables native USDC transfers post hard finality via a burn and mint method	Enables native USDC transfers post soft finality and/or hard finality via a burn and mint method
+Backward Compatibility	N/A	Not backward compatible; forms a distinct network
+Understanding the Problem
+Blockchain networks often operate in siloed environments and cannot natively communicate with one another. While some ecosystems, such as Cosmos, use built-in protocols like the Inter-Blockchain Communication (IBC) protocol to enable data transmission between their appchains, direct communication between isolated networks, such as Ethereum and Avalanche, remains infeasible.
+
+Traditional bridges exist to address this limitation by enabling the transfer of digital assets, such as USDC, across blockchains. However, these bridges come with significant drawbacks. Two common methods, lock-and-mint bridging and liquidity pool bridging, require locking USDC liquidity in third-party smart contracts. This approach reduces capital efficiency and introduces additional trust assumptions.
+
+Design Approach
+As a low-level primitive, CCTP can be embedded within any app or wallet - even existing bridges - to enhance and simplify the user experience for cross-chain use cases. With USDC circulating across a large number of blockchain networks, CCTP can connect and unify liquidity across disparate ecosystems where it's supported.
+
+CCTP is built on generalized message passing and designed for composability, enabling a wide range of use cases. Developers can extend its functionality beyond just moving USDC between blockchains. For example, you can create a flow where USDC is sent across chains and automatically deposited into a DeFi lending pool after the transfer, allowing it to generate yield in an automated manner using Hooks. This experience can be designed to feel like a seamless, single transaction for the end user.
+
+How CCTP works
+CCTP enables seamless and secure transfers of USDC across blockchains through two transfer methods: Standard Transfer and Fast Transfer. Both involve burning USDC on the source chain and minting it on the destination chain, but the steps and speed differ:
+
+Standard Transfer (Available in CCTP V1 and CCTP V2)
+Standard Transfer is the default method for transferring USDC across blockchains and operates based on the finality of transactions on the source blockchain. It leverages Circle's Attestation Service to enable standard-finality (hard finality) transfers. The process involves the following steps:
+
+Initiation. A user accesses an app powered by either CCTP V1 or CCTP V2 and initiates a Standard Transfer of USDC, specifying the recipient's wallet address on the destination chain.
+Burn Event. The app facilitates a burn of the specified USDC amount on the source blockchain.
+Attestation. Circle's Attestation Service observes the burn event and, after observing hard finality on the source chain, issues a signed attestation. Hard finality ensures the burn is irreversible (about 13 minutes on EVM chains).
+Mint Event. The app fetches the signed attestation from Circle and uses it to trigger the minting of USDC on the destination chain.
+Completion. The recipient wallet address receives the newly minted USDC on the destination blockchain, completing the transfer.
+Standard Transfer prioritizes reliability and security, making it suitable for scenarios where finality wait times are acceptable.
+
+Fast Transfer (Available only in CCTP V2)
+Fast Transfer is an advanced feature of CCTP V2 designed for speed-sensitive use cases. It leverages Circle's Attestation Service and Fast Transfer Allowance to enable faster-than-finality (soft finality) transfers. The process involves the following steps:
+
+Initiation. A user accesses an app powered by CCTP V2 and initiates a Fast Transfer of USDC, specifying the recipient's wallet address on the destination chain.
+Burn Event. The app facilitates a burn of the specified USDC amount on the source blockchain.
+Instant Attestation. Circle's Attestation Service attests to the burn event after soft finality (which varies per chain) and issues a signed attestation.
+Fast Transfer Allowance Backing. Until hard finality is reached, the burned USDC amount is backed by Circle's Fast Transfer Allowance. The Fast Transfer Allowance is temporarily debited by the burn amount.
+Mint Event. The app fetches the signed attestation from Circle and uses it to trigger the minting of USDC on the destination chain. A fee is collected onchain during this process.
+Fast Transfer Allowance Replenishment. Once the burn reaches finality on the source chain, the corresponding amount is credited back to Circle's Fast Transfer Allowance.
+Completion. The recipient wallet address receives the newly minted USDC on the destination blockchain, completing the transfer.
+Fast Transfer is ideal for low-latency use cases, enabling USDC transfers to be completed in seconds while maintaining trust and security via Circle's Fast Transfer Allowance.
+
+CCTP V2 White Paper
+
+Read the CCTP V2 White Paper to learn about the motivation behind CCTP V2 and how the CCTP V2 Fast Transfer Allowance balances speed, risk, and capital efficiency in cross-chain USDC transfers.
+
+Use Cases
+CCTP enables developers to build novel cross-chain apps that integrate functionalities like trading, lending, payments, NFTs, and gaming, while simplifying the user experience. Below are some practical examples of how you can leverage CCTP in your applications, either directly or indirectly by routing USDC behind the scenes:
+
+Fast and secure cross-chain rebalancing
+Market makers, fillers/solvers, exchanges, and bridges can use CCTP to manage liquidity more efficiently. By securely rebalancing USDC holdings across blockchains, you can reduce operational costs, meet demand, and take advantage of market opportunities with minimal latency.
+
+Composable cross-chain swaps
+With CCTP, users can quickly swap between digital assets on different blockchains by routing through USDC. Users can also swap for USDC and automatically trigger subsequent actions on the destination chain, enabling seamless cross-chain transactions.
+
+Programmable cross-chain purchases
+Automate cross-chain purchases with CCTP. For example, a user can use USDC on one chain to purchase an NFT on a decentralized exchange on another chain and list it for sale on an NFT marketplace. When the transaction is initiated, CCTP routes USDC across chains to buy the NFT and opens the listing on the marketplace—all in one streamlined flow.
+
+Simplify cross-chain complexities
+Simplify the cross-chain experience by using USDC as collateral on one chain to open a borrowing position on a lending protocol on another chain. With CCTP, USDC can move quickly between blockchains, allowing users to onboard to new applications without switching wallets or managing multi-chain complexities.
+

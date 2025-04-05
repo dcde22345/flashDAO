@@ -13,33 +13,34 @@ export default function SelfVerification({ onSuccess }: SelfVerificationProps) {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // 当组件挂载时生成用户ID
+    // Generate user ID when component mounts
     setUserId(uuidv4());
   }, []);
 
   if (!userId) return null;
 
-  // 创建SelfApp配置 - 更新为使用新的API端点
+  // Create SelfApp configuration - updated to use new API endpoint
   const selfApp = new SelfAppBuilder({
     appName: "FlashDAO Volunteer",
     scope: "flashdao-volunteer-verification",
-    endpoint: "/api/verify", // 使用相对路径指向我们的API
+    endpoint: "/api/verify", // Use relative path pointing to our API
     userId,
   }).build();
 
   return (
     <div className="verify-container">
-      <h2 className="verify-title">扫描二维码验证身份</h2>
+      <h2 className="verify-title">Scan QR Code to Verify Identity</h2>
       <p className="verify-description">
-        使用Self App扫描此二维码完成身份验证流程
+        Use the Self App to scan this QR code and complete the identity
+        verification process.
       </p>
 
       <div className="qrcode-container">
         <SelfQRcodeWrapper
           selfApp={selfApp}
           onSuccess={() => {
-            console.log("验证成功!");
-            // 调用父组件传入的成功回调
+            console.log("Verification successful!");
+            // Call the success callback passed from the parent component
             if (onSuccess) {
               onSuccess();
             }
@@ -48,9 +49,12 @@ export default function SelfVerification({ onSuccess }: SelfVerificationProps) {
         />
       </div>
 
-      <p className="verify-id">验证ID: {userId.substring(0, 8)}...</p>
+      <p className="verify-id">Verification ID: {userId.substring(0, 8)}...</p>
 
-      <div className="buttons-container">
+      <div
+        className="buttons-container"
+        style={{ display: "flex", gap: "0.5rem" }}
+      >
         <Button
           onClick={() => window.open("https://self.xyz/", "_blank")}
           className="download-button"

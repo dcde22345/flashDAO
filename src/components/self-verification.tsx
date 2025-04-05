@@ -23,8 +23,17 @@ export default function SelfVerification({ onSuccess }: SelfVerificationProps) {
   const selfApp = new SelfAppBuilder({
     appName: "FlashDAO Volunteer",
     scope: "flashdao-volunteer-verification",
-    endpoint: "/api/verify", // Use relative path pointing to our API
+    endpoint: "https://9aaa-111-235-226-130.ngrok-free.app/api/verify", // 使用最新的ngrok URL
     userId,
+    disclosures: {
+      minimumAge: 18, // 要求用户年龄至少18岁
+      name: true, // 要求披露姓名
+      nationality: true, // 要求披露国籍
+      passport_number: true, // 要求披露护照号码
+      // 可选的其他披露项:
+      // dateOfBirth: true,     // 出生日期
+      // gender: true,          // 性别
+    },
   }).build();
 
   return (

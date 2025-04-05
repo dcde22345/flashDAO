@@ -73,8 +73,7 @@ export default function VolunteerPage() {
                     <span className="sr-only">Close</span>
                   </DialogClose>
                   <DialogHeader>
-                    <DialogTitle className="dialog-title">
-                    </DialogTitle>
+                    <DialogTitle className="dialog-title"></DialogTitle>
                   </DialogHeader>
                   {/* Integrate Self Verification Component */}
                   <SelfVerification

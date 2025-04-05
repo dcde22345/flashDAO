@@ -1,0 +1,10 @@
+{
+  "network": "baseSepolia",
+  "deployer": "0xef976497b21DfeE0c5daDCef2fb5fe79E204f202",
+  "timestamp": "2025-04-05T14:25:37.649Z",
+  "contracts": {
+    "usdc": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "selfProtocol": "0x58296BdcfC5061905ba5ED52534BD1330067B06F",
+    "factory": "0xB1614282AfB92D9E596Ab69C6bcb75384437F1a1"
+  }
+}

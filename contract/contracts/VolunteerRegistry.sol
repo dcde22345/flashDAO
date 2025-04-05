@@ -2,7 +2,6 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/ISelfProtocol.sol";
 
 /**
@@ -10,13 +9,11 @@ import "./interfaces/ISelfProtocol.sol";
  * @dev Contract for registering and managing volunteers for FlashDAO events
  */
 contract VolunteerRegistry is AccessControl {
-    using Counters for Counters.Counter;
-    
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant EVENT_MANAGER_ROLE = keccak256("EVENT_MANAGER_ROLE");
     
     ISelfProtocol public selfProtocol;
-    Counters.Counter private _volunteerId;
+    uint256 private _volunteerId;
     
     struct Volunteer {
         uint256 id;
@@ -75,8 +72,8 @@ contract VolunteerRegistry is AccessControl {
         require(selfProtocol.verifyCredentials(msg.sender, _credentials), "Invalid credentials");
         
         // Create new volunteer
-        _volunteerId.increment();
-        uint256 newVolunteerId = _volunteerId.current();
+        uint256 newVolunteerId = _volunteerId;
+        _volunteerId = _volunteerId + 1;
         
         Volunteer memory newVolunteer = Volunteer({
             id: newVolunteerId,
@@ -117,8 +114,8 @@ contract VolunteerRegistry is AccessControl {
         require(selfProtocol.verifyCredentials(_volunteerAddress, _credentials), "Invalid credentials");
         
         // Create new volunteer
-        _volunteerId.increment();
-        uint256 newVolunteerId = _volunteerId.current();
+        uint256 newVolunteerId = _volunteerId;
+        _volunteerId = _volunteerId + 1;
         
         Volunteer memory newVolunteer = Volunteer({
             id: newVolunteerId,
@@ -242,6 +239,6 @@ contract VolunteerRegistry is AccessControl {
      * @return Total number of volunteers
      */
     function getVolunteerCount() external view returns (uint256) {
-        return _volunteerId.current();
+        return _volunteerId;
     }
 } 

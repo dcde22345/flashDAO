@@ -21,7 +21,7 @@ contract ERC20Mock is ERC20, Ownable {
         string memory name,
         string memory symbol,
         uint8 decimalsValue
-    ) ERC20(name, symbol) Ownable() {
+    ) ERC20(name, symbol) Ownable(msg.sender) {
         _decimals = decimalsValue;
         transferOwnership(msg.sender);
     }

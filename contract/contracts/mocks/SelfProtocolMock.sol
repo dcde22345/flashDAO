@@ -18,8 +18,8 @@ contract SelfProtocolMock is ISelfProtocol, Ownable {
     /**
      * @dev Constructor
      */
-    constructor() Ownable() {
-        transferOwnership(msg.sender);
+    constructor() Ownable(msg.sender) {
+        // No initialization needed
     }
     
     /**

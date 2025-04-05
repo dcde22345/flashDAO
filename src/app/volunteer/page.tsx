@@ -12,136 +12,155 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
+  DialogClose,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/volunteer-dialog";
+import { toast } from "sonner";
+import { UserPlus, Vote, X } from "lucide-react";
+import SelfVerification from "@/components/self-verification";
 
 export default function VolunteerPage() {
   const [isVerified, setIsVerified] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const candidates = ["Candidate A", "Candidate B"];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">志願者選舉</h1>
+    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold mb-4 text-center text-blue-800">
+        Volunteer Election
+      </h1>
+      <p className="text-center text-gray-600 text-sm mb-6">
+        <span className="text-indigo-600 font-bold">1,327</span> participants,
+        and
+        <span className="text-green-600 font-bold"> 45,000 USDT</span> raised
+      </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* 成為志願者候選人 */}
-        <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle>成為志願者候選人</CardTitle>
-            <CardDescription>
-              擔任募款兌現者，協助將資金用於實際救助
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-gray-700">
-                志願者將擔任此 DAO
-                的募款兌現者，當成為最高票的志願者會立即被視為所有資金的 swap
-                地址。
-              </p>
-              <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                <li>需要通過 Self 數位認證</li>
-                <li>投票期間需公開真實姓名</li>
-                <li>若未履行職責將被列入黑名單</li>
-                <li>無初始投入金額限制</li>
+      <div className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
+        <div className="w-full md:w-1/2 flex-shrink-0">
+          {/* Volunteer Application */}
+          <Card className="bg-white w-full h-full shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <UserPlus className="text-blue-600" />
+                <CardTitle>Become a Volunteer Candidate</CardTitle>
+              </div>
+              <CardDescription>
+                Act as a fund executor and help allocate resources for real
+                relief efforts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="list-disc pl-5 text-gray-700 space-y-1">
+                <li className="text-blue-800">
+                  Requires Self digital verification
+                </li>
+                <li className="text-blue-800">Real name must be disclosed</li>
+                <li className="text-blue-800">
+                  Failure to perform duties will result in blacklisting
+                </li>
               </ul>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                    申請成為候選人
+                  <Button className="apply-button">
+                    Apply to Become a Candidate
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="dialog-content">
+                  <DialogClose className="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-gray-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                    <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                    <span className="sr-only">Close</span>
+                  </DialogClose>
                   <DialogHeader>
-                    <DialogTitle>志願者申請流程</DialogTitle>
-                    <DialogDescription>
-                      請按照以下步驟完成申請：
-                    </DialogDescription>
+                    <DialogTitle className="dialog-title">
+                    </DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4">
-                    <ol className="list-decimal pl-5 space-y-2">
-                      <li>下載 Self App</li>
-                      <li>掃描護照進行身份驗證</li>
-                      <li>上傳相關證明文件</li>
-                      <li>等待驗證結果</li>
-                    </ol>
-                    <Button
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={() => setIsVerified(true)}
-                    >
-                      開始驗證流程
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardContent>
-        </Card>
+                  {/* Integrate Self Verification Component */}
+                  <SelfVerification
+                    onSuccess={() => {
+                      setIsVerified(true);
+                      toast.success("Identity verification successful");
+                    }}
+                  />
 
-        {/* 投票選舉志願者 */}
-        <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle>投票選舉志願者</CardTitle>
-            <CardDescription>為您信任的志願者投下寶貴的一票</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-gray-700">
-                投入資金者具備等值的投票權，可以票選最值得信任的志願者。
-              </p>
-              <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                <li>投入資金即獲得投票權</li>
-                <li>投票權與投入金額等值</li>
-                <li>志願者不得參與投票</li>
-                <li>時限內選出最高票志願者</li>
-              </ul>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    disabled={hasVoted}
-                  >
-                    {hasVoted ? "已投票" : "開始投票"}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>投票須知</DialogTitle>
-                    <DialogDescription>
-                      請仔細閱讀以下投票規則：
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <p className="text-gray-700">
-                      投票後，最高票的志願者將成為資金的兌現者，負責將資金用於實際救助。
-                    </p>
-                    <div className="space-y-2">
-                      <h3 className="font-semibold">候選人名單：</h3>
-                      <div className="space-y-2">
-                        {/* 這裡可以動態渲染候選人名單 */}
-                        <div className="flex items-center justify-between p-2 border rounded">
-                          <span>候選人 A</span>
-                          <Button size="sm" onClick={() => setHasVoted(true)}>
-                            投票
-                          </Button>
-                        </div>
-                        <div className="flex items-center justify-between p-2 border rounded">
-                          <span>候選人 B</span>
-                          <Button size="sm" onClick={() => setHasVoted(true)}>
-                            投票
-                          </Button>
-                        </div>
-                      </div>
+                  {isVerified && (
+                    <div className="success-container">
+                      <p className="success-message">
+                        ✓ Identity successfully verified
+                      </p>
+                      <Button
+                        className="submit-button"
+                        onClick={() => {
+                          toast.success("Volunteer application submitted 🎉");
+                        }}
+                      >
+                        Submit Volunteer Application
+                      </Button>
                     </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="w-full md:w-1/2 flex-shrink-0">
+          {/* Voting Section */}
+          <Card className="bg-white w-full h-full shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Vote className="text-green-600" />
+                <CardTitle>Vote for Volunteers</CardTitle>
+              </div>
+              <CardDescription>
+                Support the volunteers you trust and help shape the DAO
+                direction
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-700">
+                Your contribution gives you voting rights. Number of votes =
+                amount donated.
+              </p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="vote-button" disabled={hasVoted}>
+                    {hasVoted ? "Voted" : "Start Voting"}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="dialog-content">
+                  <DialogClose className="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-gray-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                    <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                    <span className="sr-only">Close</span>
+                  </DialogClose>
+                  <DialogHeader>
+                    <DialogTitle className="dialog-title">
+                      Choose the candidate you support
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="candidate-container">
+                    {candidates.map((name) => (
+                      <div key={name} className="candidate-item">
+                        <span className="candidate-name">{name}</span>
+                        <Button
+                          size="sm"
+                          className="candidate-vote-button"
+                          onClick={() => {
+                            setHasVoted(true);
+                            toast.success(`You voted for ${name} 🎉`);
+                          }}
+                        >
+                          Vote
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </DialogContent>
               </Dialog>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,37 @@
+{
+  "name": "flashdao-agent",
+  "version": "1.0.0",
+  "description": "FlashDAO - LLM powered DAO creation agent",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "start": "node scripts/eventListener.js",
+    "generate": "node scripts/llmContractGenerator.js",
+    "compile": "npx hardhat compile"
+  },
+  "keywords": [
+    "blockchain",
+    "dao",
+    "ethereum",
+    "flow",
+    "llm",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-viem": "^2.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.0.2",
+    "hardhat": "^2.22.1"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.8.0",
+    "@nomicfoundation/hardhat-ignition": "^0.15.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "axios": "^1.6.7",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3"
+  }
+}

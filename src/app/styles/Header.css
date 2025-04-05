@@ -1,0 +1,380 @@
+/* src/styles/Header.css */
+.header {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+}
+
+.logo img {
+  height: 40px;
+}
+
+.main-nav ul {
+  display: flex;
+  list-style: none;
+}
+
+.main-nav li {
+  margin: 0 15px;
+}
+
+.main-nav a {
+  color: var(--text-primary);
+  font-weight: 600;
+  position: relative;
+}
+
+.main-nav a:hover {
+  color: var(--primary-color);
+}
+
+.main-nav a:after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: var(--transition);
+}
+
+.main-nav a:hover:after {
+  width: 100%;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions > * {
+  margin-left: 10px;
+}
+
+/* Wallet Button Styles */
+.wallet-button {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: white;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wallet-button:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.wallet-connected {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: default;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: var(--text-primary);
+  margin: 5px 0;
+  transition: var(--transition);
+}
+
+@media (max-width: 992px) {
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .main-nav.active {
+    display: block;
+  }
+  
+  .main-nav ul {
+    flex-direction: column;
+  }
+  
+  .main-nav li {
+    margin: 10px 0;
+  }
+  
+  .mobile-menu-toggle {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .wallet-button, .wallet-connected {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+  .wallet-button .lucide-wallet, .wallet-connected .lucide-wallet {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-button span, .wallet-connected span {
+    display: none;
+  }
+  
+  .wallet-button, .wallet-connected {
+    padding: 6px;
+  }
+  
+  .wallet-button .lucide-wallet, .wallet-connected .lucide-wallet {
+    margin-right: 0 !important;
+  }
+}
+
+/* src/styles/Hero.css */
+.hero {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+  padding: 100px 0;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.hero-buttons {
+  margin-bottom: 40px;
+}
+
+.hero-buttons .btn {
+  margin: 0 10px 10px;
+}
+
+.search-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-search {
+  display: flex;
+  position: relative;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 15px;
+  border: none;
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  font-size: 1rem;
+}
+
+.search-btn {
+  padding: 15px 25px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.search-btn:hover {
+  background-color: var(--accent-dark);
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 80px 0;
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero {
+    padding: 60px 0;
+  }
+  
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+  
+  .search-input, .search-btn {
+    padding: 12px;
+  }
+}
+
+/* src/styles/ProjectCard.css */
+.project-card {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.project-image {
+  position: relative;
+  height: 0;
+  padding-bottom: 60%;
+  overflow: hidden;
+}
+
+.project-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-category {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 5px 10px;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.project-content {
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-title {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.project-title a {
+  color: var(--text-primary);
+}
+
+.project-title a:hover {
+  color: var(--primary-color);
+}
+
+.project-meta {
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.project-progress {
+  margin-top: auto;
+  margin-bottom: 15px;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.amount {
+  font-weight: 700;
+}
+
+.project-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.days-left {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* src/styles/ProjectList.css */
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+@media (max-width: 992px) {
+  .project-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .project-list {
+    grid-template-columns: 1fr;
+  }
+}

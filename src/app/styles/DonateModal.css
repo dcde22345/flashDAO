@@ -1,0 +1,214 @@
+/* Donate Modal Styles */
+.donate-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.donate-modal-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.donate-modal-header {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.donate-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1e3a8a;
+}
+
+.donate-modal-description {
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+.donate-modal-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  color: #6b7280;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+
+.donate-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.donate-modal-content {
+  margin-bottom: 24px;
+}
+
+.amount-input-container {
+  margin-bottom: 20px;
+}
+
+.amount-input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.amount-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  color: #1f2937;
+  transition: border-color 0.2s;
+  padding-right: 80px;
+}
+
+.amount-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.currency-label {
+  position: absolute;
+  right: 16px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.preset-amounts {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preset-amount-btn {
+  background-color: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.preset-amount-btn:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.preset-amount-btn.active {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.donation-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-button {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.donate-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.donate-button:hover {
+  background-color: #2563eb;
+}
+
+.donate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading Animation */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.spinner {
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
+  border-top: 3px solid #3b82f6;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #1e3a8a;
+  font-weight: 500;
+} 

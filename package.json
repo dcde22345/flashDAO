@@ -9,14 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@biconomy/abstractjs": "^0.3.0",
+    "@privy-io/react-auth": "^2.7.2",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@selfxyz/core": "^0.0.24",
     "@selfxyz/qrcode": "^0.0.17",
+    "@tanstack/react-query": "^5.71.10",
     "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "ethers": "^6.13.5",
+    "ethers": "^5.7.2",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.487.0",
     "next": "15.2.4",
@@ -25,7 +28,8 @@
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "viem": "^2.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

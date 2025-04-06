@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Wallet, Shield, Heart, X } from "lucide-react";
+import { ArrowRight, Wallet, Shield, Heart, X, ArrowLeftRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTokens } from "@/context/TokenContext";
 import "./styles/HomePage.css";
 import "./styles/DonateModal.css";
 
@@ -31,6 +32,7 @@ export default function HomePage() {
   );
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { addTokens } = useTokens();
 
   // 監聽點擊模態框外的事件
   useEffect(() => {
@@ -58,31 +60,52 @@ export default function HomePage() {
     setDonationAmount(amount);
   };
 
-  // 處理捐款
+  // Process donation
   const handleDonate = async () => {
     if (!donationAmount || parseFloat(donationAmount) <= 0) {
-      toast.error("請輸入有效的捐款金額");
+      toast.error("Please enter a valid donation amount");
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      // 僅模擬交易過程，不實際打開錢包或轉賬
-      toast.info(`準備處理 ${donationAmount} USDTC 的捐贈`);
+      // Get token amount (same as donation amount)
+      const tokenAmount = parseFloat(donationAmount);
+      
+      // Process transaction
+      toast.info(`Processing ${donationAmount} USDC donation`, {
+        duration: 3000
+      });
 
-      // 延遲一秒模擬處理過程
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Delay to simulate processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      toast.success(`成功捐贈 ${donationAmount} USDTC!`);
+      // Success notification
+      toast.success(`Successfully donated ${donationAmount} USDC!`, {
+        duration: 4000
+      });
+      
+      // Token notification (delayed to allow user to see donation success first)
+      setTimeout(() => {
+        // Use context to add tokens
+        addTokens(tokenAmount);
+        
+        // Show token received notification
+        toast.success(`🎉 Received ${tokenAmount} DAO tokens!`, {
+          duration: 5000
+        });
+      }, 3000);
 
-      // 延遲一秒後導航到志願者頁面
+      // Navigate to volunteer page after longer delay
       setTimeout(() => {
         router.push("/volunteer");
-      }, 1000);
+      }, 7000);
     } catch (error) {
-      console.error("捐款處理錯誤:", error);
-      toast.error("捐款處理過程中發生錯誤");
+      console.error("Donation processing error:", error);
+      toast.error("An error occurred while processing the donation", {
+        duration: 4000
+      });
       setIsProcessing(false);
     }
   };
@@ -97,18 +120,18 @@ export default function HomePage() {
           {isProcessing && (
             <div className="loading-overlay">
               <div className="spinner"></div>
-              <p className="loading-text">模擬捐贈處理中，請稍候...</p>
+              <p className="loading-text">Processing donation, please wait...</p>
             </div>
           )}
 
           <div className="donate-modal-header">
-            <h2 className="donate-modal-title">支持緊急響應</h2>
+            <h2 className="donate-modal-title">Support Emergency Response</h2>
             <p className="donate-modal-description">
-              這是演示模式，您的捐款將模擬用於
+              Your donation will be used for
               {currentResponseId
                 ? activeResponses.find((r) => r.id === currentResponseId)?.name
-                : "緊急災害"}
-              的救援工作
+                : "emergency disaster"} 
+              relief efforts
             </p>
             <button
               className="donate-modal-close"
@@ -120,7 +143,7 @@ export default function HomePage() {
 
           <div className="donate-modal-content">
             <div className="amount-input-container">
-              <label className="amount-input-label">捐款金額</label>
+              <label className="amount-input-label">Donation Amount</label>
               <div className="amount-input-wrapper">
                 <input
                   type="number"
@@ -134,7 +157,7 @@ export default function HomePage() {
                   min="0"
                   step="0.01"
                 />
-                <span className="currency-label">USDTC</span>
+                <span className="currency-label">USDC</span>
               </div>
 
               <div className="preset-amounts">
@@ -180,7 +203,7 @@ export default function HomePage() {
               onClick={() => setShowDonateModal(false)}
               disabled={isProcessing}
             >
-              取消
+              Cancel
             </button>
             <button
               className="donate-button"
@@ -191,7 +214,7 @@ export default function HomePage() {
                 parseFloat(donationAmount) <= 0
               }
             >
-              立即捐贈
+              Donate Now
             </button>
           </div>
         </div>
@@ -216,6 +239,8 @@ export default function HomePage() {
 
   return (
     <main className="flex flex-col min-h-screen">
+      {/* 右上角Cross-Chain Transfer按鈕已移除 */}
+
       {/* 捐款模態框 */}
       <DonateModal />
 
@@ -435,6 +460,47 @@ export default function HomePage() {
             >
               Respond Now
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Cross-Chain Section */}
+      <section className="trust-signals bg-gradient-to-r from-blue-50 to-indigo-50 mt-16 py-12">
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+              <div className="w-12 h-12 mb-4">
+                <img src="/images/chains/ethereum.svg" alt="Ethereum Sepolia" className="w-full h-full" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Ethereum Sepolia</h3>
+              <p className="text-sm text-gray-500 text-center">Ethereum testnet providing secure and reliable cross-chain infrastructure</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+              <div className="w-12 h-12 mb-4">
+                <img src="/images/chains/base.svg" alt="Base Sepolia" className="w-full h-full" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Base Sepolia</h3>
+              <p className="text-sm text-gray-500 text-center">Base testnet offering low-cost and efficient Layer 2 experience</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+              <div className="w-12 h-12 mb-4">
+                <img src="/images/chains/avalanche.svg" alt="Avalanche Fuji" className="w-full h-full" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Avalanche Fuji</h3>
+              <p className="text-sm text-gray-500 text-center">Avalanche testnet with fast confirmations and low transaction fees</p>
+            </div>
+          </div>
+          
+          {/* 添加按鈕入口 */}
+          <div className="flex justify-center mt-8">
+            <Link href="/cross-chain-transfer">
+              <Button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg shadow-lg flex items-center gap-2 transition-all hover:scale-105">
+                <ArrowLeftRight size={20} />
+                <span className="font-medium">Try Cross-Chain Transfer</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

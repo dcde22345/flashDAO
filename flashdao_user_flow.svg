@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title { font: bold 24px sans-serif; fill: #1E40AF; }
+    .subtitle { font: 16px sans-serif; fill: #4B5563; }
+    .step { fill: #F0F9FF; stroke: #60A5FA; stroke-width: 2; filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.1)); }
+    .decision { fill: #EFF6FF; stroke: #3B82F6; stroke-width: 2; }
+    .start-end { fill: #DBEAFE; stroke: #2563EB; stroke-width: 2; }
+    .step-title { font: bold 14px sans-serif; fill: #1E40AF; }
+    .step-desc { font: 12px sans-serif; fill: #4B5563; }
+    .arrow { stroke: #60A5FA; stroke-width: 2; marker-end: url(#arrowhead); }
+    .flow-label { font: 12px sans-serif; fill: #4B5563; }
+    .path-option { font: bold 12px sans-serif; fill: #1E40AF; }
+  </style>
+  
+  <!-- Definitions -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#60A5FA" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="40" class="title" text-anchor="middle">FlashDAO User Flow</text>
+  <text x="400" y="70" class="subtitle" text-anchor="middle">Emergency Response Process</text>
+  
+  <!-- Start -->
+  <ellipse cx="400" cy="100" rx="120" ry="30" class="start-end" />
+  <text x="400" y="105" class="step-title" text-anchor="middle">Disaster Event Occurs</text>
+  
+  <!-- Step 1: Oracle Detection -->
+  <rect x="300" y="160" width="200" height="60" rx="10" class="step" />
+  <text x="400" y="185" class="step-title" text-anchor="middle">Oracle Detects Disaster</text>
+  <text x="400" y="205" class="step-desc" text-anchor="middle">Real-world event is detected</text>
+  
+  <!-- Step 2: AI Contract Generation -->
+  <rect x="300" y="250" width="200" height="60" rx="10" class="step" />
+  <text x="400" y="275" class="step-title" text-anchor="middle">AI Generates Contract</text>
+  <text x="400" y="295" class="step-desc" text-anchor="middle">Claude creates event-specific DAO</text>
+  
+  <!-- Step 3: DAO Deployment -->
+  <rect x="300" y="340" width="200" height="60" rx="10" class="step" />
+  <text x="400" y="365" class="step-title" text-anchor="middle">EventDAO Deployment</text>
+  <text x="400" y="385" class="step-desc" text-anchor="middle">Smart contract deployed to blockchain</text>
+  
+  <!-- Step 4: Donation Collection -->
+  <rect x="300" y="430" width="200" height="60" rx="10" class="step" />
+  <text x="400" y="455" class="step-title" text-anchor="middle">USDC Donation Collection</text>
+  <text x="400" y="475" class="step-desc" text-anchor="middle">Users donate with Circle payment gateway</text>
+  
+  <!-- Decision Point: Role Selection -->
+  <polygon points="400,520 500,570 400,620 300,570" class="decision" />
+  <text x="400" y="575" class="step-title" text-anchor="middle">Choose Role</text>
+  
+  <!-- Path 1: Volunteer -->
+  <rect x="100" y="650" width="200" height="80" rx="10" class="step" />
+  <text x="200" y="675" class="step-title" text-anchor="middle">Become Volunteer</text>
+  <text x="200" y="695" class="step-desc" text-anchor="middle">Verify identity via Self</text>
+  <text x="200" y="715" class="step-desc" text-anchor="middle">Reveal real name</text>
+  
+  <!-- Path 2: Voter -->
+  <rect x="500" y="650" width="200" height="80" rx="10" class="step" />
+  <text x="600" y="675" class="step-title" text-anchor="middle">Become Voter</text>
+  <text x="600" y="695" class="step-desc" text-anchor="middle">Use DAO tokens from donation</text>
+  <text x="600" y="715" class="step-desc" text-anchor="middle">Vote for trusted volunteer</text>
+  
+  <!-- End: Fund Distribution -->
+  <ellipse cx="400" cy="780" rx="180" ry="30" class="start-end" />
+  <text x="400" y="785" class="step-title" text-anchor="middle">Funds Distributed to Highest-Voted Volunteer</text>
+  
+  <!-- Flow Arrows -->
+  <path d="M400 130 L400 160" class="arrow" />
+  <path d="M400 220 L400 250" class="arrow" />
+  <path d="M400 310 L400 340" class="arrow" />
+  <path d="M400 400 L400 430" class="arrow" />
+  <path d="M400 490 L400 520" class="arrow" />
+  <path d="M300 570 L200 650" class="arrow" />
+  <path d="M500 570 L600 650" class="arrow" />
+  <path d="M200 730 L400 780" class="arrow" />
+  <path d="M600 730 L400 780" class="arrow" />
+  
+  <!-- Flow Labels -->
+  <text x="250" y="570" class="path-option" text-anchor="middle">Option 1</text>
+  <text x="550" y="570" class="path-option" text-anchor="middle">Option 2</text>
+</svg> 

@@ -840,4 +840,22 @@
   display: block;
   margin-top: 2px;
   margin-left: 5px;
+}
+
+/* 添加以下CSS規則以隱藏QR碼錯誤狀態和打叉動畫 */
+.qr-container [data-error-state="true"],
+.qr-container [data-error-state="true"] *,
+.qr-container .error-animation,
+.qr-container .error-state {
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* 始終顯示QR碼，即使出現錯誤 */
+.qr-container svg,
+.qr-container canvas {
+  display: block !important;
+  opacity: 1 !important;
 } 

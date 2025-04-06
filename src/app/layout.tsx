@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./styles/globals.css";
 import ClientHeader from "@/components/ClientHeader";
 import { Toaster } from "sonner";
+import { PrivyProvider } from "@/context/PrivyProvider";
+import { TokenProvider } from "@/context/TokenContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,10 +22,14 @@ export default function RootLayout({
   return (
     <html lang="zh-TW" className={inter.className}>
       <head />
-      <body>
-        <ClientHeader />
-        <main>{children}</main>
-        <Toaster position="top-right" richColors closeButton />
+      <body suppressHydrationWarning={true}>
+        <PrivyProvider>
+          <TokenProvider>
+            <ClientHeader />
+            <main>{children}</main>
+            <Toaster position="top-right" richColors closeButton />
+          </TokenProvider>
+        </PrivyProvider>
       </body>
     </html>
   );

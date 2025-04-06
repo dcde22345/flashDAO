@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="700" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title { font: bold 24px sans-serif; fill: #1E40AF; }
+    .subtitle { font: 16px sans-serif; fill: #4B5563; }
+    .layer-title { font: bold 16px sans-serif; fill: #1E3A8A; }
+    .tech-box { fill: #F0F9FF; stroke: #60A5FA; stroke-width: 2; filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.1)); }
+    .layer-box { fill: #EFF6FF; stroke: #3B82F6; stroke-width: 1; opacity: 0.4; }
+    .tech-title { font: bold 14px sans-serif; fill: #1E40AF; }
+    .tech-desc { font: 12px sans-serif; fill: #4B5563; }
+    .connector { stroke: #60A5FA; stroke-width: 1; stroke-dasharray: 4,2; }
+    .integration { fill: #DBEAFE; stroke: #2563EB; stroke-width: 2; }
+    .integration-title { font: bold 14px sans-serif; fill: #1D4ED8; }
+  </style>
+  
+  <!-- Title -->
+  <text x="400" y="40" class="title" text-anchor="middle">FlashDAO Technology Stack</text>
+  <text x="400" y="70" class="subtitle" text-anchor="middle">Technologies powering automated disaster response</text>
+  
+  <!-- Layer 1: Frontend -->
+  <rect x="100" y="100" width="600" height="100" rx="10" class="layer-box" />
+  <text x="130" y="120" class="layer-title">Frontend Layer</text>
+  
+  <rect x="150" y="130" width="150" height="60" rx="5" class="tech-box" />
+  <text x="225" y="155" class="tech-title" text-anchor="middle">Next.js</text>
+  <text x="225" y="175" class="tech-desc" text-anchor="middle">React framework</text>
+  
+  <rect x="330" y="130" width="150" height="60" rx="5" class="tech-box" />
+  <text x="405" y="155" class="tech-title" text-anchor="middle">TailwindCSS</text>
+  <text x="405" y="175" class="tech-desc" text-anchor="middle">Utility-first CSS</text>
+  
+  <rect x="510" y="130" width="150" height="60" rx="5" class="tech-box" />
+  <text x="585" y="155" class="tech-title" text-anchor="middle">ethers.js</text>
+  <text x="585" y="175" class="tech-desc" text-anchor="middle">Ethereum library</text>
+  
+  <!-- Layer 2: API & Backend -->
+  <rect x="100" y="220" width="600" height="100" rx="10" class="layer-box" />
+  <text x="130" y="240" class="layer-title">API & Backend Layer</text>
+  
+  <rect x="150" y="250" width="150" height="60" rx="5" class="tech-box" />
+  <text x="225" y="275" class="tech-title" text-anchor="middle">API Routes</text>
+  <text x="225" y="295" class="tech-desc" text-anchor="middle">Next.js serverless functions</text>
+  
+  <rect x="330" y="250" width="150" height="60" rx="5" class="tech-box" />
+  <text x="405" y="275" class="tech-title" text-anchor="middle">Claude API</text>
+  <text x="405" y="295" class="tech-desc" text-anchor="middle">AI for contract generation</text>
+  
+  <rect x="510" y="250" width="150" height="60" rx="5" class="tech-box" />
+  <text x="585" y="275" class="tech-title" text-anchor="middle">Self Protocol API</text>
+  <text x="585" y="295" class="tech-desc" text-anchor="middle">Identity verification</text>
+  
+  <!-- Layer 3: Blockchain -->
+  <rect x="100" y="340" width="600" height="160" rx="10" class="layer-box" />
+  <text x="130" y="360" class="layer-title">Blockchain Layer</text>
+  
+  <rect x="150" y="370" width="150" height="60" rx="5" class="tech-box" />
+  <text x="225" y="395" class="tech-title" text-anchor="middle">Solidity Contracts</text>
+  <text x="225" y="415" class="tech-desc" text-anchor="middle">Smart contracts</text>
+  
+  <rect x="330" y="370" width="150" height="60" rx="5" class="tech-box" />
+  <text x="405" y="395" class="tech-title" text-anchor="middle">Hardhat</text>
+  <text x="405" y="415" class="tech-desc" text-anchor="middle">Development environment</text>
+  
+  <rect x="510" y="370" width="150" height="60" rx="5" class="tech-box" />
+  <text x="585" y="395" class="tech-title" text-anchor="middle">CCTP v2</text>
+  <text x="585" y="415" class="tech-desc" text-anchor="middle">Cross-chain transfer</text>
+  
+  <rect x="150" y="440" width="150" height="50" rx="5" class="tech-box" />
+  <text x="225" y="465" class="tech-title" text-anchor="middle">EVM Chains</text>
+  <text x="225" y="480" class="tech-desc" text-anchor="middle">Ethereum, Sepolia, etc.</text>
+  
+  <rect x="330" y="440" width="150" height="50" rx="5" class="tech-box" />
+  <text x="405" y="465" class="tech-title" text-anchor="middle">ERC-20 Tokens</text>
+  <text x="405" y="480" class="tech-desc" text-anchor="middle">USDC, FlashDAOToken</text>
+  
+  <rect x="510" y="440" width="150" height="50" rx="5" class="tech-box" />
+  <text x="585" y="465" class="tech-title" text-anchor="middle">Events</text>
+  <text x="585" y="480" class="tech-desc" text-anchor="middle">Oracle data feeds</text>
+  
+  <!-- Layer 4: Payment & Integration -->
+  <rect x="100" y="520" width="600" height="100" rx="10" class="layer-box" />
+  <text x="130" y="540" class="layer-title">Integration Layer</text>
+  
+  <rect x="150" y="550" width="150" height="60" rx="5" class="integration" />
+  <text x="225" y="575" class="integration-title" text-anchor="middle">Circle Payments</text>
+  <text x="225" y="595" class="tech-desc" text-anchor="middle">USDC payment gateway</text>
+  
+  <rect x="330" y="550" width="150" height="60" rx="5" class="integration" />
+  <text x="405" y="575" class="integration-title" text-anchor="middle">Self Protocol</text>
+  <text x="405" y="595" class="tech-desc" text-anchor="middle">Digital identity verification</text>
+  
+  <rect x="510" y="550" width="150" height="60" rx="5" class="integration" />
+  <text x="585" y="575" class="integration-title" text-anchor="middle">Chainlink Oracles</text>
+  <text x="585" y="595" class="tech-desc" text-anchor="middle">Real-world data feeds</text>
+  
+  <!-- Connecting Lines Between Layers -->
+  <line x1="225" y1="190" x2="225" y2="250" class="connector" />
+  <line x1="405" y1="190" x2="405" y2="250" class="connector" />
+  <line x1="585" y1="190" x2="585" y2="250" class="connector" />
+  
+  <line x1="225" y1="310" x2="225" y2="370" class="connector" />
+  <line x1="405" y1="310" x2="405" y2="370" class="connector" />
+  <line x1="585" y1="310" x2="585" y2="370" class="connector" />
+  
+  <line x1="225" y1="490" x2="225" y2="550" class="connector" />
+  <line x1="405" y1="490" x2="405" y2="550" class="connector" />
+  <line x1="585" y1="490" x2="585" y2="550" class="connector" />
+  
+  <!-- Legend -->
+  <rect x="250" y="660" width="80" height="20" rx="5" class="tech-box" />
+  <text x="350" y="675" class="tech-desc">Core Technologies</text>
+  
+  <rect x="450" y="660" width="80" height="20" rx="5" class="integration" />
+  <text x="550" y="675" class="tech-desc">Third-party Integrations</text>
+</svg> 

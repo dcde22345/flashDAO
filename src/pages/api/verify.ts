@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Initialize and configure the verifier
       const selfBackendVerifier = new SelfBackendVerifier(
         'flashdao-volunteer-verification', 
-        'https://9aaa-111-235-226-130.ngrok-free.app/api/verify'
+        'https://3cda-2402-7500-a2d-3e67-c934-80ef-4f77-6cdf.ngrok-free.app/api/verify'
       );
       
       // 验证证明
